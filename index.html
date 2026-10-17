@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>小學數學冒險王 - 新思維 P.1~P.6 動物樂園版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Noto+Sans+TC:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #ffe6f0 0%, #e0f2fe 50%, #fef3c7 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 彈跳動畫 */
+        .bouncy {
+            animation: bounce 2s infinite ease-in-out;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* 搖擺可愛動物動畫 */
+        .wiggle {
+            animation: wiggle 2.5s infinite ease-in-out;
+            display: inline-block;
+        }
+        @keyframes wiggle {
+            0%, 100% { transform: rotate(-6deg) scale(1); }
+            50% { transform: rotate(6deg) scale(1.08); }
+        }
+
+        /* 果凍按鈕特效 */
+        .jelly-btn {
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        .jelly-btn:hover {
+            transform: scale(1.03) translateY(-2px);
+        }
+        .jelly-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 背景漂浮卡通動物 */
+        .floating-bg-animal {
+            position: fixed;
+            user-select: none;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.35;
+            animation: floatUp linear infinite;
+        }
+        @keyframes floatUp {
+            0% {
+                transform: translateY(105vh) rotate(0deg);
+            }
+            100% {
+                transform: translateY(-15vh) rotate(360deg);
+            }
+        }
+
+        /* 答對慶祝飄落粒子 */
+        .confetti-animal {
+            position: fixed;
+            pointer-events: none;
+            z-index: 100;
+            animation: fallConfetti 1.5s ease-out forwards;
+        }
+        @keyframes fallConfetti {
+            0% {
+                transform: translate(0, 0) scale(0.5) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(1.3) rotate(var(--rot));
+                opacity: 0;
+            }
+        }
+
+        /* 隱藏捲軸但保留滾動 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="text-slate-700 flex flex-col items-center justify-start p-3 sm:p-6 box-border">
+
+    <!-- 背景漂浮動物容器 -->
+    <div id="bg-animals-container"></div>
+
+    <!-- 主容器：z-10 確保在背景動物上方，直式手機完美自適應 -->
+    <div id="app" class="relative z-10 w-full max-w-md bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl p-4 sm:p-5 border-4 border-pink-300 flex flex-col box-border">
+        
+        <!-- 頂部列：回首頁、難度、金幣/星星 -->
+        <div id="top-bar" class="flex justify-between items-center mb-3 pb-2.5 border-b-2 border-pink-100">
+            <button onclick="goHome()" class="bg-pink-100 hover:bg-pink-200 text-pink-600 font-bold px-3 py-1.5 rounded-full text-xs sm:text-sm flex items-center gap-1 jelly-btn shadow-sm">
+                🏠 首頁
+            </button>
+            <div class="flex items-center gap-1.5 sm:gap-2">
+                <span id="display-diff" class="bg-purple-100 text-purple-600 text-xs font-bold px-2.5 py-1 rounded-full">⭐ Lv.1</span>
+                <span class="bg-amber-100 text-amber-700 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">⭐ <span id="star-count">0</span></span>
+                <span class="bg-yellow-100 text-yellow-800 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1">🪙 <span id="coin-count">0</span></span>
+            </div>
+        </div>
+
+        <!-- 畫面 1：首頁選單 -->
+        <div id="screen-home" class="flex flex-col items-center">
+            <!-- 動態吉祥物舞台 -->
+            <div class="relative bg-gradient-to-b from-pink-100/80 to-amber-50/80 w-full rounded-2xl p-4 mb-3 flex flex-col items-center border-2 border-pink-200 shadow-inner">
+                <div class="flex items-center justify-center gap-3 mb-1">
+                    <span class="text-2xl wiggle">🐰</span>
+                    <div class="relative text-6xl bouncy select-none" id="home-mascot-display">
+                        🦉
+                    </div>
+                    <span class="text-2xl wiggle" style="animation-delay: 0.5s;">🐼</span>
+                </div>
+                <h1 class="text-xl sm:text-2xl font-black text-pink-500 tracking-wide text-center">小學數學冒險王</h1>
+                <p class="text-[11px] sm:text-xs text-amber-600 font-bold bg-amber-100 px-3 py-0.5 rounded-full mt-1">
+                    🐾 教育出版社《小學數學新思維》P.1 - P.6 🐾
+                </p>
+            </div>
+
+            <!-- 吉祥物對話框 -->
+            <div class="w-full bg-pink-50 border-2 border-pink-200 rounded-2xl p-3 mb-4 text-xs text-pink-700 flex items-center gap-3 shadow-sm">
+                <div class="text-3xl wiggle" id="dialog-pet-icon">🐱</div>
+                <div class="leading-relaxed">
+                    <span class="font-bold">動物學伴：</span>嗨！歡迎來到森林數學王國！快選一個年級，和可愛動物們一起闖關賺金幣吧！
+                </div>
+            </div>
+
+            <!-- 選單按鈕區 -->
+            <div class="w-full flex flex-col gap-2.5 mb-2">
+                <button onclick="openGradeSelect()" class="w-full bg-gradient-to-r from-pink-400 via-rose-400 to-orange-400 text-white font-bold py-3.5 px-4 rounded-2xl shadow-md jelly-btn text-base flex items-center justify-between">
+                    <span class="flex items-center gap-2">🚀 開始闖關練習 (小一至小六)</span>
+                    <span class="text-lg">🐾</span>
+                </button>
+                <button onclick="openShop()" class="w-full bg-gradient-to-r from-amber-400 to-yellow-500 text-white font-bold py-3 px-4 rounded-2xl shadow-md jelly-btn text-base flex items-center justify-between">
+                    <span class="flex items-center gap-2">🦁 可愛動物學伴與換裝屋</span>
+                    <span class="text-lg">🎁</span>
+                </button>
+                <button onclick="openSettings()" class="w-full bg-gradient-to-r from-purple-400 to-indigo-400 text-white font-bold py-3 px-4 rounded-2xl shadow-md jelly-btn text-base flex items-center justify-between">
+                    <span class="flex items-center gap-2">⚙️ 題數與難度設定 (Lv.1~10)</span>
+                    <span class="text-lg">⚙️</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 畫面 2：年級與單元選擇 (支援一至六年級) -->
+        <div id="screen-grade" class="flex flex-col items-center hidden">
+            <h2 class="text-base sm:text-lg font-black text-pink-500 mb-2 flex items-center gap-1">
+                <span>🎒</span> 選擇年級與新思維單元 <span>🐾</span>
+            </h2>
+            
+            <!-- 1~6 年級切換 3x2 網格 -->
+            <div class="grid grid-cols-3 gap-1.5 w-full bg-pink-50 p-1.5 rounded-2xl mb-3 border border-pink-200">
+                <button onclick="switchGradeTab(1)" id="tab-g1" class="py-1.5 text-xs font-bold rounded-xl transition">🐣 一年級</button>
+                <button onclick="switchGradeTab(2)" id="tab-g2" class="py-1.5 text-xs font-bold rounded-xl transition">🐰 二年級</button>
+                <button onclick="switchGradeTab(3)" id="tab-g3" class="py-1.5 text-xs font-bold rounded-xl transition">🦊 三年級</button>
+                <button onclick="switchGradeTab(4)" id="tab-g4" class="py-1.5 text-xs font-bold rounded-xl transition">🐼 四年級</button>
+                <button onclick="switchGradeTab(5)" id="tab-g5" class="py-1.5 text-xs font-bold rounded-xl transition">🐨 五年級</button>
+                <button onclick="switchGradeTab(6)" id="tab-g6" class="py-1.5 text-xs font-bold rounded-xl transition">🦁 六年級</button>
+            </div>
+
+            <!-- 單元清單容器 -->
+            <div id="unit-list" class="w-full flex flex-col gap-2 max-h-72 overflow-y-auto no-scrollbar pr-0.5">
+                <!-- 動態生成單元按鈕 -->
+            </div>
+
+            <button onclick="goHome()" class="w-full mt-3 bg-slate-200 hover:bg-slate-300 text-slate-600 font-bold py-2.5 rounded-xl text-sm jelly-btn">
+                返回主選單
+            </button>
+        </div>
+
+        <!-- 畫面 3：設定選單 (題數 5~50, 難度 1~10) -->
+        <div id="screen-settings" class="flex flex-col items-center hidden">
+            <h2 class="text-lg font-bold text-purple-600 mb-3">⚙️ 遊戲參數設定</h2>
+            
+            <div class="w-full bg-purple-50/70 border-2 border-purple-200 rounded-2xl p-4 flex flex-col gap-4 mb-4 text-sm">
+                <!-- 題數設定 -->
+                <div>
+                    <label class="font-bold text-purple-700 mb-1 flex justify-between items-center">
+                        <span>📝 每局練習題數：</span>
+                        <span id="lbl-qcount" class="bg-purple-200 text-purple-800 px-2.5 py-0.5 rounded-full text-xs">10 題</span>
+                    </label>
+                    <input type="range" id="input-qcount" min="5" max="50" step="5" value="10" oninput="updateSettingsPreview()" class="w-full accent-purple-500 cursor-pointer">
+                    <div class="flex justify-between text-[10px] text-purple-400 mt-1">
+                        <span>5題 (輕鬆)</span>
+                        <span>25題 (適中)</span>
+                        <span>50題 (特訓)</span>
+                    </div>
+                </div>
+
+                <!-- 難度設定 (1~10級) -->
+                <div>
+                    <label class="font-bold text-purple-700 mb-1 flex justify-between items-center">
+                        <span>⭐ 挑戰難度級別：</span>
+                        <span id="lbl-diff" class="bg-purple-200 text-purple-800 px-2.5 py-0.5 rounded-full text-xs">Lv. 1</span>
+                    </label>
+                    <input type="range" id="input-diff" min="1" max="10" step="1" value="1" oninput="updateSettingsPreview()" class="w-full accent-purple-500 cursor-pointer">
+                    <div class="flex justify-between text-[10px] text-purple-400 mt-1">
+                        <span>Lv.1 (基礎概念)</span>
+                        <span>Lv.5 (進階挑戰)</span>
+                        <span>Lv.10 (奧數大師)</span>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="saveSettings()" class="w-full bg-purple-500 hover:bg-purple-600 text-white font-bold py-2.5 rounded-xl text-sm jelly-btn shadow-md">
+                💾 儲存設定並返回
+            </button>
+        </div>
+
+        <!-- 畫面 4：動物學伴與換裝商店 -->
+        <div id="screen-shop" class="flex flex-col items-center hidden">
+            <h2 class="text-lg font-bold text-amber-600 mb-2">🦁 可愛動物學伴商店</h2>
+            <div class="text-xs text-amber-800 bg-amber-50 p-2.5 rounded-xl mb-3 text-center border-2 border-amber-200 w-full font-bold">
+                目前金幣：🪙 <span id="shop-coin">0</span> ｜ 累積星星：⭐ <span id="shop-star">0</span>
+            </div>
+
+            <div class="w-full grid grid-cols-1 gap-2 max-h-72 overflow-y-auto no-scrollbar pr-0.5 mb-3" id="shop-items-container">
+                <!-- 動態商店商品 -->
+            </div>
+
+            <button onclick="goHome()" class="w-full bg-slate-200 hover:bg-slate-300 text-slate-600 font-bold py-2.5 rounded-xl text-sm jelly-btn">
+                返回主選單
+            </button>
+        </div>
+
+        <!-- 畫面 5：答題進行中 -->
+        <div id="screen-game" class="flex flex-col items-center hidden">
+            <!-- 進度與動物應援區 -->
+            <div class="w-full flex justify-between items-center mb-2 gap-1">
+                <span id="q-progress" class="bg-pink-100 text-pink-600 font-bold text-xs px-2.5 py-1 rounded-full whitespace-nowrap">第 1 / 10 題</span>
+                <span id="q-helper-msg" class="text-xs text-amber-700 font-bold bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200 truncate">🐼 熊貓胖胖：加油！</span>
+            </div>
+
+            <!-- 進度條 -->
+            <div class="w-full bg-pink-100 h-2.5 rounded-full mb-3 overflow-hidden p-0.5">
+                <div id="progress-bar" class="bg-gradient-to-r from-pink-400 via-rose-400 to-amber-400 h-full w-0 rounded-full transition-all duration-300"></div>
+            </div>
+
+            <!-- 可愛動物出題舞台 -->
+            <div class="w-full bg-gradient-to-b from-pink-50/90 to-white border-2 border-pink-200 rounded-2xl p-4 mb-2 flex flex-col items-center box-border shadow-sm relative">
+                <!-- 題目專屬動物插圖動畫 -->
+                <div class="flex items-center justify-center gap-2 mb-2">
+                    <span id="question-animal-left" class="text-3xl wiggle">🐰</span>
+                    <span id="question-badge" class="text-[11px] font-bold bg-pink-100 text-pink-600 px-2.5 py-0.5 rounded-full">新思維挑戰</span>
+                    <span id="question-animal-right" class="text-3xl bouncy">🥕</span>
+                </div>
+
+                <!-- 題目文字 -->
+                <div id="question-text" class="text-base sm:text-lg font-bold text-slate-700 text-center mb-4 leading-relaxed tracking-wide px-1 break-words w-full">
+                    載入題目中...
+                </div>
+
+                <!-- 輸入區 -->
+                <div id="answer-area" class="w-full flex flex-col gap-2.5 items-center box-border">
+                    <input type="number" step="any" id="user-input" placeholder="請輸入答案數字" class="w-full text-center text-lg font-bold py-2.5 px-3 border-2 border-pink-300 rounded-xl focus:outline-none focus:border-pink-500 bg-white box-border shadow-inner" onkeydown="if(event.key==='Enter') submitAnswer()">
+                    <button onclick="submitAnswer()" class="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white font-bold py-3 rounded-xl shadow-md jelly-btn text-base flex items-center justify-center gap-2">
+                        <span>確定送出答案</span> <span>🐾</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 畫面 6：結算畫面 -->
+        <div id="screen-result" class="flex flex-col items-center text-center hidden">
+            <div class="text-5xl mb-2 bouncy">🦁🎉🐰</div>
+            <h2 class="text-xl font-black text-pink-500 mb-1">森林大冒險完成！</h2>
+            <p class="text-xs text-slate-400 mb-4">所有小動物都為你的努力拍手歡呼！</p>
+
+            <div class="w-full bg-pink-50 border-2 border-pink-200 rounded-2xl p-4 mb-4 flex flex-col gap-2.5 text-sm">
+                <div class="flex justify-between items-center font-bold">
+                    <span>🎯 答對題數：</span>
+                    <span id="res-correct" class="text-pink-600 text-base">8 / 10</span>
+                </div>
+                <div class="flex justify-between items-center font-bold">
+                    <span>⭐ 獲得星星：</span>
+                    <span id="res-star" class="text-amber-600 text-base">+8 ⭐</span>
+                </div>
+                <div class="flex justify-between items-center font-bold">
+                    <span>🪙 獲得金幣：</span>
+                    <span id="res-coin" class="text-yellow-600 text-base">+40 🪙</span>
+                </div>
+            </div>
+
+            <div class="w-full flex gap-2">
+                <button onclick="restartGame()" class="flex-1 bg-pink-500 hover:bg-pink-600 text-white font-bold py-3 rounded-xl text-sm jelly-btn shadow-md">
+                    再玩一次 🔄
+                </button>
+                <button onclick="goHome()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-600 font-bold py-3 rounded-xl text-sm jelly-btn">
+                    回主選單 🏠
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 自訂提示 Modal / 動物回饋視窗 -->
+    <div id="custom-modal" class="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
+        <div class="bg-white rounded-3xl p-5 max-w-xs w-full text-center border-4 border-pink-300 shadow-2xl bouncy">
+            <div id="modal-icon" class="text-5xl mb-2 wiggle">🎉</div>
+            <h3 id="modal-title" class="text-lg font-black text-pink-500 mb-1">答對了！</h3>
+            <p id="modal-desc" class="text-xs sm:text-sm text-slate-600 mb-4 leading-relaxed">小動物們跳起舞來了！獲得 1 顆星星與 5 枚金幣！</p>
+            <button onclick="closeModal()" class="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white font-bold py-2.5 rounded-xl text-sm shadow-md jelly-btn">
+                繼續下一題 🐾
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 遊戲狀態與 LocalStorage 存檔
+        let gameState = {
+            stars: parseInt(localStorage.getItem('math_stars')) || 0,
+            coins: parseInt(localStorage.getItem('math_coins')) || 0,
+            qCount: parseInt(localStorage.getItem('math_qcount')) || 10,
+            difficulty: parseInt(localStorage.getItem('math_diff')) || 1,
+            unlockedPets: JSON.parse(localStorage.getItem('math_pets')) || ['owl'],
+            equippedPet: localStorage.getItem('math_equipped_pet') || 'owl'
+        };
+
+        let currentGrade = 1;
+        let currentUnitId = '';
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let correctCount = 0;
+        let currentCorrectAnswer = null;
+
+        // 動物商店與夥伴清單
+        const petShopItems = [
+            { id: 'owl', name: '博士貓頭鷹小Q', cost: 0, icon: '🦉', badge: '🎓' },
+            { id: 'rabbit', name: '跳跳小粉兔', cost: 25, icon: '🐰', badge: '🥕' },
+            { id: 'panda', name: '竹葉小熊貓', cost: 40, icon: '🐼', badge: '🎋' },
+            { id: 'shiba', name: '微笑柴犬汪汪', cost: 60, icon: '🐶', badge: '🦴' },
+            { id: 'koala', name: '愛睏無尾熊', cost: 80, icon: '🐨', badge: '🌿' },
+            { id: 'lion', name: '森林獅子王', cost: 100, icon: '🦁', badge: '👑' },
+            { id: 'unicorn', name: '彩虹獨角獸', cost: 150, icon: '🦄', badge: '🌈' }
+        ];
+
+        // 教育出版社《小學數學新思維》（第二版）小一至小六完整單元架構
+        const curriculum = {
+            1: [
+                { id: 'g1_1', name: '1. 20以內的數與順數倒數', icon: '🐣' },
+                { id: 'g1_2', name: '2. 18以內的加法與減法', icon: '🐰' },
+                { id: 'g1_3', name: '3. 長度、距離與香港硬幣', icon: '🪙' },
+                { id: 'g1_4', name: '4. 兩位數認識與不進退位加減', icon: '🐢' },
+                { id: 'g1_5', name: '5. 新思維生活文字題 (小一)', icon: '🦊' }
+            ],
+            2: [
+                { id: 'g2_1', name: '1. 三位數與100以內進退位加減', icon: '🐼' },
+                { id: 'g2_2', name: '2. 基本乘法 (0-10) 與九九乘法', icon: '🐝' },
+                { id: 'g2_3', name: '3. 基本除法與分物概念', icon: '🐿️' },
+                { id: 'g2_4', name: '4. 香港紙幣與購物找贖計算', icon: '🛍️' },
+                { id: 'g2_5', name: '5. 新思維生活文字題 (小二)', icon: '🦒' }
+            ],
+            3: [
+                { id: 'g3_1', name: '1. 四位數與多位數乘除法', icon: '🐨' },
+                { id: 'g3_2', name: '2. 四則混合計算 (先乘除後加減)', icon: '🦉' },
+                { id: 'g3_3', name: '3. 分數認識與同分母分數加減', icon: '🍕' },
+                { id: 'g3_4', name: '4. 長方形與正方形周界計算', icon: '📐' },
+                { id: 'g3_5', name: '5. 新思維生活文字題 (小三)', icon: '🐬' }
+            ],
+            4: [
+                { id: 'g4_1', name: '1. 倍數、因數、H.C.F. 與 L.C.M.', icon: '🐘' },
+                { id: 'g4_2', name: '2. 兩位數乘法與多位數除法', icon: '🦘' },
+                { id: 'g4_3', name: '3. 分數種類(假分數/帶分數)與計算', icon: '🍰' },
+                { id: 'g4_4', name: '4. 小數的認識與加減法', icon: '🐧' },
+                { id: 'g4_5', name: '5. 長方形與正方形面積及文字題', icon: '🦁' }
+            ],
+            5: [
+                { id: 'g5_1', name: '1. 多位數(大數)與異分母分數加減', icon: '🐳' },
+                { id: 'g5_2', name: '2. 分數乘法與小數乘法', icon: '🦊' },
+                { id: 'g5_3', name: '3. 三角形、平行四邊形與梯形面積', icon: '📐' },
+                { id: 'g5_4', name: '4. 簡易代數符號與一步方程', icon: '🔍' },
+                { id: 'g5_5', name: '5. 正方體與長方體體積及文字題', icon: '📦' }
+            ],
+            6: [
+                { id: 'g6_1', name: '1. 小數除法與四則混合計算', icon: '🐯' },
+                { id: 'g6_2', name: '2. 百分數認識與小數互化及折扣', icon: '🏷️' },
+                { id: 'g6_3', name: '3. 圓周計算 (π=3.14) 與速率問題', icon: '🚀' },
+                { id: 'g6_4', name: '4. 平均數計算與兩步簡易方程', icon: '📊' },
+                { id: 'g6_5', name: '5. 新思維綜合高階應用文字題', icon: '🦄' }
+            ]
+        };
+
+        // 初始化背景漂浮卡通動物
+        function initFloatingBgAnimals() {
+            const container = document.getElementById('bg-animals-container');
+            const animals = ['🐰', '🐼', '🐨', '🦊', '🦁', '🐸', '🐥', '🦄', '🐝', '🐢', '🐾', '⭐'];
+            container.innerHTML = '';
+            for (let i = 0; i < 12; i++) {
+                const span = document.createElement('span');
+                span.className = 'floating-bg-animal text-2xl sm:text-3xl';
+                span.innerText = animals[i % animals.length];
+                span.style.left = `${Math.random() * 92}vw`;
+                span.style.animationDuration = `${12 + Math.random() * 14}s`;
+                span.style.animationDelay = `-${Math.random() * 15}s`;
+                container.appendChild(span);
+            }
+        }
+
+        // 答對時噴發可愛動物與星星粒子
+        function triggerAnimalCelebration() {
+            const emojis = ['🐰', '🐼', '🦁', '🦄', '⭐', '🎉', '💖', '🐾', '🏆'];
+            for (let i = 0; i < 16; i++) {
+                const el = document.createElement('div');
+                el.className = 'confetti-animal text-2xl';
+                el.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                el.style.left = '50vw';
+                el.style.top = '45vh';
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 60 + Math.random() * 140;
+                el.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
+                el.style.setProperty('--ty', `${Math.sin(angle) * dist - 40}px`);
+                el.style.setProperty('--rot', `${(Math.random() - 0.5) * 360}deg`);
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 1500);
+            }
+        }
+
+        // Web Audio API 音效合成器
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            try {
+                initAudio();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    // 歡快四音和弦 (C5-E5-G5-C6)
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.08);
+                    osc.frequency.setValueAtTime(783.99, now + 0.16);
+                    osc.frequency.setValueAtTime(1046.50, now + 0.24);
+                    gain.gain.setValueAtTime(0.18, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+                    osc.start(now);
+                    osc.stop(now + 0.5);
+                } else {
+                    // 溫和提示低音
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(240, now);
+                    osc.frequency.setValueAtTime(190, now + 0.15);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                }
+            } catch (e) {
+                console.log('Audio error:', e);
+            }
+        }
+
+        function getEquippedPetObj() {
+            return petShopItems.find(p => p.id === gameState.equippedPet) || petShopItems[0];
+        }
+
+        function updateTopBar() {
+            document.getElementById('star-count').innerText = gameState.stars;
+            document.getElementById('coin-count').innerText = gameState.coins;
+            document.getElementById('display-diff').innerText = `⭐ Lv.${gameState.difficulty}`;
+            
+            const pet = getEquippedPetObj();
+            const mascotEl = document.getElementById('home-mascot-display');
+            if (mascotEl) mascotEl.innerText = `${pet.icon}${pet.badge}`;
+            const dialogIcon = document.getElementById('dialog-pet-icon');
+            if (dialogIcon) dialogIcon.innerText = pet.icon;
+        }
+
+        function hideAllScreens() {
+            ['screen-home', 'screen-grade', 'screen-settings', 'screen-shop', 'screen-game', 'screen-result'].forEach(s => {
+                document.getElementById(s).classList.add('hidden');
+            });
+        }
+
+        function goHome() {
+            hideAllScreens();
+            document.getElementById('screen-home').classList.remove('hidden');
+            updateTopBar();
+        }
+
+        // 年級與單元選擇 (P.1 ~ P.6)
+        function openGradeSelect() {
+            hideAllScreens();
+            document.getElementById('screen-grade').classList.remove('hidden');
+            switchGradeTab(currentGrade || 1);
+        }
+
+        function switchGradeTab(grade) {
+            currentGrade = grade;
+            for (let i = 1; i <= 6; i++) {
+                const btn = document.getElementById(`tab-g${i}`);
+                if (btn) {
+                    if (i === grade) {
+                        btn.className = "py-1.5 text-xs font-black rounded-xl bg-gradient-to-r from-pink-500 to-rose-400 text-white shadow-sm transition transform scale-105";
+                    } else {
+                        btn.className = "py-1.5 text-xs font-bold rounded-xl bg-white/70 text-slate-600 hover:bg-white transition";
+                    }
+                }
+            }
+            const listEl = document.getElementById('unit-list');
+            listEl.innerHTML = '';
+            curriculum[grade].forEach(unit => {
+                const uBtn = document.createElement('button');
+                uBtn.className = "w-full bg-pink-50/90 hover:bg-pink-100 border-2 border-pink-200 text-pink-700 font-bold p-3 rounded-2xl flex justify-between items-center transition jelly-btn text-xs sm:text-sm text-left";
+                uBtn.innerHTML = `
+                    <span class="flex items-center gap-2 pr-2">
+                        <span class="text-xl wiggle">${unit.icon}</span>
+                        <span>${unit.name}</span>
+                    </span>
+                    <span class="bg-pink-500 text-white text-[11px] px-2.5 py-1 rounded-full whitespace-nowrap">挑戰 ➔</span>
+                `;
+                uBtn.onclick = () => startUnitGame(unit.id, unit.name, unit.icon);
+                listEl.appendChild(uBtn);
+            });
+        }
+
+        // 設定選單
+        function openSettings() {
+            hideAllScreens();
+            document.getElementById('screen-settings').classList.remove('hidden');
+            document.getElementById('input-qcount').value = gameState.qCount;
+            document.getElementById('input-diff').value = gameState.difficulty;
+            updateSettingsPreview();
+        }
+
+        function updateSettingsPreview() {
+            const q = document.getElementById('input-qcount').value;
+            const d = document.getElementById('input-diff').value;
+            document.getElementById('lbl-qcount').innerText = `${q} 題`;
+            document.getElementById('lbl-diff').innerText = `Lv. ${d}`;
+        }
+
+        function saveSettings() {
+            gameState.qCount = parseInt(document.getElementById('input-qcount').value);
+            gameState.difficulty = parseInt(document.getElementById('input-diff').value);
+            localStorage.setItem('math_qcount', gameState.qCount);
+            localStorage.setItem('math_diff', gameState.difficulty);
+            updateTopBar();
+            goHome();
+        }
+
+        // 商店選單
+        function openShop() {
+            hideAllScreens();
+            document.getElementById('screen-shop').classList.remove('hidden');
+            document.getElementById('shop-coin').innerText = gameState.coins;
+            document.getElementById('shop-star').innerText = gameState.stars;
+            
+            const container = document.getElementById('shop-items-container');
+            container.innerHTML = '';
+            petShopItems.forEach(item => {
+                const isUnlocked = gameState.unlockedPets.includes(item.id);
+                const isEquipped = gameState.equippedPet === item.id;
+                
+                const div = document.createElement('div');
+                div.className = "bg-amber-50/80 border-2 border-amber-200 rounded-2xl p-2.5 flex justify-between items-center text-xs";
+                div.innerHTML = `
+                    <div class="flex items-center gap-2.5">
+                        <span class="text-3xl wiggle">${item.icon}${item.badge}</span>
+                        <div>
+                            <div class="font-bold text-amber-900 text-sm">${item.name}</div>
+                            <div class="text-[11px] text-amber-600 font-bold">${item.cost === 0 ? '免費初始夥伴' : `需要金幣：🪙 ${item.cost}`}</div>
+                        </div>
+                    </div>
+                    <div>
+                        ${isEquipped ? '<span class="bg-green-100 text-green-700 font-bold px-3 py-1.5 rounded-xl border border-green-300">陪伴中 🐾</span>' : 
+                          isUnlocked ? `<button onclick="equipPet('${item.id}')" class="bg-amber-400 hover:bg-amber-500 text-white font-bold px-3 py-1.5 rounded-xl shadow-sm jelly-btn">選擇</button>` :
+                          `<button onclick="buyPet('${item.id}',${item.cost})" class="bg-gradient-to-r from-orange-400 to-rose-400 text-white font-bold px-3 py-1.5 rounded-xl shadow-sm jelly-btn">解鎖</button>`}
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function buyPet(id, cost) {
+            if (gameState.coins >= cost) {
+                gameState.coins -= cost;
+                gameState.unlockedPets.push(id);
+                gameState.equippedPet = id;
+                localStorage.setItem('math_coins', gameState.coins);
+                localStorage.setItem('math_pets', JSON.stringify(gameState.unlockedPets));
+                localStorage.setItem('math_equipped_pet', gameState.equippedPet);
+                playSound('correct');
+                triggerAnimalCelebration();
+                openShop();
+                updateTopBar();
+            } else {
+                playSound('wrong');
+                showModal('🪙', '金幣還不夠喔！', '快去挑戰數學題目，每答對一題就能獲得 5 枚金幣！', false);
+            }
+        }
+
+        function equipPet(id) {
+            gameState.equippedPet = id;
+            localStorage.setItem('math_equipped_pet', id);
+            openShop();
+            updateTopBar();
+        }
+
+        // 工具函數：隨機整數與最大公因數
+        function randInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+        function gcd(a, b) {
+            return b === 0 ? a : gcd(b, a % b);
+        }
+
+        // 啟動單元遊戲
+        let currentUnitTitle = '';
+        function startUnitGame(unitId, unitName, unitIcon) {
+            currentUnitId = unitId;
+            currentUnitTitle = unitName || '新思維挑戰';
+            currentQuestions = generateQuestions(unitId, gameState.qCount, gameState.difficulty);
+            currentIndex = 0;
+            correctCount = 0;
+
+            hideAllScreens();
+            document.getElementById('screen-game').classList.remove('hidden');
+            document.getElementById('question-badge').innerText = currentUnitTitle;
+            loadQuestion();
+        }
+
+        // 《小學數學新思維》P.1 ~ P.6 題庫產生器
+        function generateQuestions(unitId, count, diff) {
+            let questions = [];
+            const animalPairs = [
+                ['🐰', '🥕'], ['🐼', '🎋'], ['🐵', '🍌'], ['🐶', '🦴'],
+                ['🐱', '🐟'], ['🐿️', '🌰'], ['🐻', '🍯'], ['🐨', '🌿'],
+                ['🦁', '👑'], ['🐸', '🍀'], ['🐧', '❄️'], ['🦄', '🌈']
+            ];
+
+            for (let i = 0; i < count; i++) {
+                let qText = "";
+                let ans = 0;
+                const pair = animalPairs[i % animalPairs.length];
+
+                switch (unitId) {
+                    // ================= 一年級 (P.1) =================
+                    case 'g1_1': { // 20以內順數倒數与數量
+                        let start = randInt(1, 10 + diff);
+                        let step = randInt(1, 3);
+                        qText = `🐣 小雞排隊報數：${start}，${start + step}，${start + step * 2}，下一個數是多少？`;
+                        ans = start + step * 3;
+                        break;
+                    }
+                    case 'g1_2': { // 18以內加減
+                        let a = randInt(3, 8 + diff);
+                        let b = randInt(2, 7 + Math.floor(diff / 2));
+                        if (Math.random() > 0.4) {
+                            qText = `🐰 小白兔早上拔了 ${a} 根紅蘿蔔，下午又拔了 ${b} 根，今天一共拔了幾根紅蘿蔔？`;
+                            ans = a + b;
+                        } else {
+                            let total = a + b;
+                            qText = `🐿️ 松鼠有 ${total} 顆松果，吃掉了 ${a} 顆後，還剩下幾顆松果？`;
+                            ans = b;
+                        }
+                        break;
+                    }
+                    case 'g1_3': { // 長度與香港硬幣 (1元, 2元, 5元)
+                        let c5 = randInt(1, 2);
+                        let c2 = randInt(1, 3 + Math.floor(diff / 3));
+                        let c1 = randInt(1, 4);
+                        qText = `🪙 小豬撲滿裡有 ${c5} 個 5元硬幣、${c2} 個 2元硬幣和 ${c1} 個 1元硬幣，合共有多少元？`;
+                        ans = c5 * 5 + c2 * 2 + c1;
+                        break;
+                    }
+                    case 'g1_4': { // 兩位數不進退位加減
+                        let tensA = randInt(1, 4 + Math.floor(diff / 2));
+                        let onesA = randInt(1, 4);
+                        let tensB = randInt(1, 3);
+                        let onesB = randInt(1, 5);
+                        let numA = tensA * 10 + onesA;
+                        let numB = tensB * 10 + onesB;
+                        qText = `🐢 烏龜爺爺走了 ${numA} 步，小烏龜走了 ${numB} 步，牠們一共走了多少步？`;
+                        ans = numA + numB;
+                        break;
+                    }
+                    case 'g1_5': { // 小一新思維文字題
+                        let a = randInt(5, 10 + diff);
+                        let b = randInt(2, 6);
+                        let c = randInt(1, 4);
+                        qText = `🦊 森林巴士上原有 ${a} 隻小動物，到站後上車 ${b} 隻，下車 ${c} 隻，現在巴士上有幾隻小動物？`;
+                        ans = a + b - c;
+                        break;
+                    }
+
+                    // ================= 二年級 (P.2) =================
+                    case 'g2_1': { // 三位數與100以內進退位加減
+                        let a = randInt(25, 45 + diff * 4);
+                        let b = randInt(18, 35 + diff * 3);
+                        let c = randInt(12, 25);
+                        qText = `🐼 熊貓餐廳準備了 ${a} 根竹子，又運來 ${b} 根，小熊貓吃掉 ${c} 根後，還剩多少根？`;
+                        ans = a + b - c;
+                        break;
+                    }
+                    case 'g2_2': { // 九九乘法
+                        let a = randInt(2, 9);
+                        let b = randInt(2, 9);
+                        qText = `🐝 每朵花上有 ${a} 隻小蜜蜂，${b} 朵花上一共有多少隻小蜜蜂？`;
+                        ans = a * b;
+                        break;
+                    }
+                    case 'g2_3': { // 基本除法
+                        let divisor = randInt(2, 9);
+                        let quotient = randInt(2, 8 + Math.floor(diff / 2));
+                        let total = divisor * quotient;
+                        qText = `🐵 美美把 ${total} 根香蕉平均分給 ${divisor} 隻小猴子，每隻小猴子可分得幾根香蕉？`;
+                        ans = quotient;
+                        break;
+                    }
+                    case 'g2_4': { // 香港紙幣與購物找贖
+                        let price = randInt(15, 38 + diff * 3);
+                        let pay = price < 50 ? 50 : 100;
+                        qText = `🛍️ 小熊買了一個售 ${price} 元的蜂蜜罐，付了一張 ${pay} 元紙幣，應找回多少元？`;
+                        ans = pay - price;
+                        break;
+                    }
+                    case 'g2_5': { // 小二新思維文字題
+                        let boxes = randInt(3, 6 + Math.floor(diff / 2));
+                        let perBox = randInt(4, 8);
+                        let extra = randInt(2, 9);
+                        qText = `🦒 長頸鹿老師買了 ${boxes} 盒鉛筆，每盒有 ${perBox} 枝，另外再買了 ${extra} 枝，合共有鉛筆多少枝？`;
+                        ans = boxes * perBox + extra;
+                        break;
+                    }
+
+                    // ================= 三年級 (P.3) =================
+                    case 'g3_1': { // 多位數乘除
+                        let a = randInt(12, 25 + diff * 3);
+                        let b = randInt(3, 8);
+                        qText = `🐨 無尾熊每天睡覺可收集 ${a} 顆夢幻星，連續 ${b} 天共可收集多少顆夢幻星？`;
+                        ans = a * b;
+                        break;
+                    }
+                    case 'g3_2': { // 四則混合計算 (先乘除後加減)
+                        let a = randInt(15, 30 + diff * 2);
+                        let b = randInt(3, 8);
+                        let c = randInt(4, 9);
+                        qText = `🦉 貓頭鷹博士出題：計算 ${a} + ${b} × ${c} = ? (記住先乘除後加減喔！)`;
+                        ans = a + (b * c);
+                        break;
+                    }
+                    case 'g3_3': { // 同分母分數加減
+                        let denom = randInt(5, 9 + Math.floor(diff / 2));
+                        let n1 = randInt(1, Math.floor(denom / 2));
+                        let n2 = randInt(1, denom - n1 - 1);
+                        qText = `🍕 一個大薄餅平分成 ${denom} 份，小狗吃了 ${n1}/${denom} 個，小貓吃了 ${n2}/${denom} 個，牠們共吃了幾分之幾？(請輸入分子數字)`;
+                        ans = n1 + n2;
+                        break;
+                    }
+                    case 'g3_4': { // 長方形與正方形周界
+                        let len = randInt(8, 15 + diff * 2);
+                        let wid = randInt(4, len - 2);
+                        qText = `📐 動物農莊有一個長方形花園，長是 ${len} 米，闊是 ${wid} 米，這個花園的周界是多少米？`;
+                        ans = (len + wid) * 2;
+                        break;
+                    }
+                    case 'g3_5': { // 小三新思維文字題
+                        let packPrice = randInt(12, 20 + diff);
+                        let countBuy = randInt(3, 5);
+                        let pay = 100;
+                        qText = `🐬 海豚媽媽買了 ${countBuy} 包海洋餅乾，每包售 ${packPrice} 元，她付了 ${pay} 元，應找回多少元？`;
+                        ans = pay - (packPrice * countBuy);
+                        break;
+                    }
+
+                    // ================= 四年級 (P.4) =================
+                    case 'g4_1': { // 因數、倍數、HCF與LCM
+                        let base = randInt(2, 5);
+                        let m1 = base * randInt(2, 4);
+                        let m2 = base * randInt(3, 5);
+                        if (m1 === m2) m2 += base;
+                        if (Math.random() > 0.5) {
+                            qText = `🐘 大象考考你：找出 ${m1} 和 ${m2} 的最大公因數 (H.C.F.) 是多少？`;
+                            ans = gcd(m1, m2);
+                        } else {
+                            qText = `🦘 袋鼠跳格子：找出 ${m1} 和 ${m2} 的最小公倍數 (L.C.M.) 是多少？`;
+                            ans = (m1 * m2) / gcd(m1, m2);
+                        }
+                        break;
+                    }
+                    case 'g4_2': { // 兩位數乘法與除法
+                        let a = randInt(11, 18 + diff);
+                        let b = randInt(11, 15);
+                        qText = `🐾 森林運動會有 ${a} 支動物隊伍，每隊有 ${b} 名隊員，共有多少名隊員參賽？`;
+                        ans = a * b;
+                        break;
+                    }
+                    case 'g4_3': { // 假分數與帶分數換算
+                        let whole = randInt(2, 5 + Math.floor(diff / 2));
+                        let denom = randInt(3, 7);
+                        let num = randInt(1, denom - 1);
+                        qText = `🍰 把帶分數 ${whole} 又 ${num}/${denom} 化為假分數，它的「分子」是多少？`;
+                        ans = whole * denom + num;
+                        break;
+                    }
+                    case 'g4_4': { // 小數加減法
+                        let a = (randInt(12, 50 + diff * 3) / 10);
+                        let b = (randInt(11, 35) / 10);
+                        qText = `🐧 企鵝買冰塊：甲冰塊重 ${a.toFixed(1)} 公斤，乙冰塊重 ${b.toFixed(1)} 公斤，兩塊共重多少公斤？`;
+                        ans = parseFloat((a + b).toFixed(1));
+                        break;
+                    }
+                    case 'g4_5': { // 長方形與正方形面積及文字題
+                        let side = randInt(6, 12 + diff);
+                        let wid = randInt(4, 10);
+                        qText = `🦁 獅子王的長方形領地長 ${side} 米、闊 ${wid} 米，這塊領地的「面積」是多少平方米？`;
+                        ans = side * wid;
+                        break;
+                    }
+
+                    // ================= 五年級 (P.5) =================
+                    case 'g5_1': { // 異分母分數加減
+                        let d1 = 2;
+                        let d2 = randInt(2, 4) * 2; // 4, 6, 8
+                        let n2 = 1;
+                        qText = `🐳 藍鯨喝水：早上喝了 1/2 桶，下午喝了 ${n2}/${d2} 桶，合共喝了幾分之幾桶？(化為同分母 ${d2} 後，請輸入分子數字)`;
+                        ans = (d2 / 2) + n2;
+                        break;
+                    }
+                    case 'g5_2': { // 分數乘法與小數乘法
+                        let a = (randInt(15, 45) / 10);
+                        let b = randInt(2, 6 + Math.floor(diff / 2));
+                        qText = `🦊 狐狸裁縫每條圍巾用布 ${a.toFixed(1)} 米，製作 ${b} 條圍巾共用布多少米？`;
+                        ans = parseFloat((a * b).toFixed(1));
+                        break;
+                    }
+                    case 'g5_3': { // 三角形、平行四邊形與梯形面積
+                        let base = randInt(6, 14 + diff) * 2; // 偶數確保整除
+                        let height = randInt(4, 12);
+                        qText = `📐 小兔的三角形菜園，底長 ${base} 米，高是 ${height} 米，菜園的面積是多少平方米？`;
+                        ans = (base * height) / 2;
+                        break;
+                    }
+                    case 'g5_4': { // 簡易代數與一步方程
+                        let x = randInt(4, 15 + diff * 2);
+                        let mult = randInt(2, 5);
+                        let total = x * mult;
+                        qText = `🔍 代數偵探社：如果 ${mult}y = ${total}，那麼未知數 y 的值是多少？`;
+                        ans = x;
+                        break;
+                    }
+                    case 'g5_5': { // 正方體與長方體體積
+                        let l = randInt(4, 8 + Math.floor(diff / 2));
+                        let w = randInt(3, 6);
+                        let h = randInt(2, 5);
+                        qText = `📦 倉鼠的長方體儲物箱長 ${l} cm、闊 ${w} cm、高 ${h} cm，它的體積是多少立方厘米 (cm³)？`;
+                        ans = l * w * h;
+                        break;
+                    }
+
+                    // ================= 六年級 (P.6) =================
+                    case 'g6_1': { // 小數除法與四則混合
+                        let ansVal = randInt(3, 12 + diff);
+                        let div = randInt(2, 5) / 10; // 0.2 ~ 0.5
+                        let total = parseFloat((ansVal * div).toFixed(1));
+                        qText = `🐯 老虎將 ${total} 升果汁，每 ${div} 升裝成一杯，共可裝滿多少杯？`;
+                        ans = ansVal;
+                        break;
+                    }
+                    case 'g6_2': { // 百分數與折扣應用
+                        let origPrice = randInt(2, 10 + diff) * 20; // 40, 60, 80...
+                        let discount = [80, 75, 50, 90][randInt(0, 3)];
+                        let label = discount === 80 ? '八折 (80%)' : discount === 75 ? '七五折 (75%)' : discount === 50 ? '半價 (50%)' : '九折 (90%)';
+                        qText = `🏷️ 森林百貨大減價！原價 ${origPrice} 元的動物背包現售${label}，折實售價是多少元？`;
+                        ans = (origPrice * discount) / 100;
+                        break;
+                    }
+                    case 'g6_3': { // 圓周計算 (π=3.14) 與速率
+                        if (Math.random() > 0.5) {
+                            let d = randInt(1, 5) * 10; // 10, 20, 30... 確保小數簡單
+                            qText = `🚀 獨角獸繞著直徑 ${d} 米的圓形噴水池跑一圈，圓周是多少米？(取 π = 3.14)`;
+                            ans = parseFloat((d * 3.14).toFixed(2));
+                        } else {
+                            let speed = randInt(40, 75 + diff * 2);
+                            let time = randInt(2, 5);
+                            qText = `🐆 獵豹列車平均速率是每小時 ${speed} 公里，行駛 ${time} 小時共走了多少公里？`;
+                            ans = speed * time;
+                        }
+                        break;
+                    }
+                    case 'g6_4': { // 平均數與兩步方程
+                        if (Math.random() > 0.5) {
+                            let avg = randInt(12, 25 + diff);
+                            let n1 = avg - randInt(2, 5);
+                            let n3 = avg + (avg - n1);
+                            qText = `📊 三隻小熊採蜂蜜，分別採得 ${n1} 罐、${avg} 罐和 ${n3} 罐，牠們平均每隻採得多少罐？`;
+                            ans = avg;
+                        } else {
+                            let x = randInt(3, 12 + diff);
+                            let a = randInt(2, 5);
+                            let b = randInt(4, 15);
+                            let res = a * x + b;
+                            qText = `🔍 解兩步方程：${a}x + ${b} = ${res}，請問 x = ?`;
+                            ans = x;
+                        }
+                        break;
+                    }
+                    default: { // 小六新思維綜合高階文字題
+                        let totalStudents = randInt(2, 5) * 20; // 40, 60, 80, 100
+                        let pct = [25, 40, 60, 75][randInt(0, 3)];
+                        qText = `🦄 森林小學六年級有 ${totalStudents} 隻小動物，其中 ${pct}% 參加了合唱團，參加合唱團的有多少隻小動物？`;
+                        ans = (totalStudents * pct) / 100;
+                        break;
+                    }
+                }
+
+                questions.push({ qText, ans, leftIcon: pair[0], rightIcon: pair[1] });
+            }
+            return questions;
+        }
+
+        function loadQuestion() {
+            if (currentIndex >= currentQuestions.length) {
+                showResult();
+                return;
+            }
+
+            const q = currentQuestions[currentIndex];
+            currentCorrectAnswer = q.ans;
+
+            document.getElementById('q-progress').innerText = `第 ${currentIndex + 1} / ${currentQuestions.length} 題`;
+            document.getElementById('question-text').innerText = q.qText;
+            document.getElementById('question-animal-left').innerText = q.leftIcon;
+            document.getElementById('question-animal-right').innerText = q.rightIcon;
+            document.getElementById('user-input').value = '';
+            
+            const percent = (currentIndex / currentQuestions.length) * 100;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+
+            const pet = getEquippedPetObj();
+            const cheers = [
+                `${pet.icon} ${pet.name}：仔細看題目喔！`,
+                `${pet.icon} ${pet.name}：動動腦筋，你一定行！`,
+                `${pet.icon} ${pet.name}：答對就有星星和金幣唷！`,
+                `${pet.icon} ${pet.name}：深呼吸，慢慢算！`
+            ];
+            document.getElementById('q-helper-msg').innerText = cheers[Math.floor(Math.random() * cheers.length)];
+
+            setTimeout(() => {
+                document.getElementById('user-input').focus();
+            }, 100);
+        }
+
+        function submitAnswer() {
+            const val = document.getElementById('user-input').value.trim();
+            if (val === '') return;
+
+            const userAns = parseFloat(val);
+            // 允許小數微小浮點誤差
+            if (Math.abs(userAns - currentCorrectAnswer) < 0.001) {
+                correctCount++;
+                playSound('correct');
+                triggerAnimalCelebration();
+                const pet = getEquippedPetObj();
+                showModal(pet.icon, '答對了！太棒了！', '小動物們為你歡呼！獲得 +1 顆星星與 +5 枚金幣！', true);
+                gameState.stars += 1;
+                gameState.coins += 5;
+            } else {
+                playSound('wrong');
+                showModal('🦊', '差一點點！別氣餒！', `正確答案是：${currentCorrectAnswer}，下一題繼續加油！`, true);
+            }
+
+            localStorage.setItem('math_stars', gameState.stars);
+            localStorage.setItem('math_coins', gameState.coins);
+            updateTopBar();
+        }
+
+        let shouldAdvanceQuestion = false;
+        function showModal(icon, title, desc, advance) {
+            shouldAdvanceQuestion = advance;
+            document.getElementById('modal-icon').innerText = icon;
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-desc').innerText = desc;
+            document.getElementById('custom-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').classList.add('hidden');
+            if (shouldAdvanceQuestion) {
+                currentIndex++;
+                if (currentIndex < currentQuestions.length) {
+                    loadQuestion();
+                } else {
+                    showResult();
+                }
+            }
+        }
+
+        function showResult() {
+            hideAllScreens();
+            document.getElementById('screen-result').classList.remove('hidden');
+            triggerAnimalCelebration();
+            document.getElementById('res-correct').innerText = `${correctCount} / ${currentQuestions.length}`;
+            document.getElementById('res-star').innerText = `+${correctCount} ⭐`;
+            document.getElementById('res-coin').innerText = `+${correctCount * 5} 🪙`;
+        }
+
+        function restartGame() {
+            startUnitGame(currentUnitId, currentUnitTitle);
+        }
+
+        // 啟動初始化
+        initFloatingBgAnimals();
+        goHome();
+    </script>
+</body>
+</html>
