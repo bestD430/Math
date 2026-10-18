@@ -1,0 +1,1805 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>小學數學冒險王 - 日本可愛動物新思維版</title>
+    <style>
+        /* 內建完整樣式，無須依賴外部 CDN，保證100%載入成功 */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            margin: 0;
+            padding: 12px;
+            font-family: "PingFang HK", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+            background: linear-gradient(135deg, #fff0f5 0%, #e6f7ff 50%, #fffbeb 100%);
+            min-height: 100vh;
+            color: #334155;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* 確保按鈕內的圖示不會阻擋點擊事件 */
+        button * {
+            pointer-events: none;
+        }
+        button {
+            cursor: pointer;
+            font-family: inherit;
+            border: none;
+            outline: none;
+            touch-action: manipulation;
+            user-select: none;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* 主容器 */
+        #app {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 440px;
+            background: rgba(255, 255, 255, 0.96);
+            border-radius: 28px;
+            box-shadow: 0 15px 35px rgba(244, 114, 182, 0.2);
+            padding: 18px;
+            border: 4px solid #fbcfe8;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 頂部狀態列 */
+        #top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #fce7f3;
+        }
+        .home-btn {
+            background: #fce7f3;
+            color: #db2777;
+            font-weight: 800;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .badge-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .status-pill {
+            font-size: 12px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .pill-purple { background: #f3e8ff; color: #7e22ce; }
+        .pill-amber { background: #fef3c7; color: #b45309; }
+        .pill-yellow { background: #fef9c3; color: #854d0e; }
+
+        /* 動畫特效 */
+        .bouncy { animation: bounce 2s infinite ease-in-out; }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-7px); }
+        }
+        .kawaii-wiggle {
+            animation: kawaiiWiggle 2.4s infinite ease-in-out;
+            display: inline-block;
+            transform-origin: bottom center;
+        }
+        @keyframes kawaiiWiggle {
+            0%, 100% { transform: rotate(-5deg) scale(1); }
+            50% { transform: rotate(5deg) scale(1.04); }
+        }
+        .jelly-btn {
+            transition: transform 0.12s ease, filter 0.12s ease;
+        }
+        .jelly-btn:hover { filter: brightness(1.03); }
+        .jelly-btn:active { transform: scale(0.95); }
+
+        /* 首頁舞台 */
+        .mascot-stage {
+            background: linear-gradient(180deg, #fce7f3 0%, #fffbeb 100%);
+            width: 100%;
+            border-radius: 22px;
+            padding: 16px 12px;
+            margin-bottom: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid #fbcfe8;
+        }
+        .stage-animals {
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 6px;
+        }
+        .title-main {
+            font-size: 22px;
+            font-weight: 900;
+            color: #ec4899;
+            margin: 4px 0;
+            text-align: center;
+        }
+        .subtitle-tag {
+            font-size: 11px;
+            color: #b45309;
+            background: #fef3c7;
+            padding: 3px 12px;
+            border-radius: 999px;
+            font-weight: 700;
+            border: 1px solid #fde68a;
+        }
+
+        /* 對話框 */
+        .dialog-box {
+            width: 100%;
+            background: #fdf2f8;
+            border: 2px solid #fbcfe8;
+            border-radius: 18px;
+            padding: 10px 12px;
+            margin-bottom: 14px;
+            font-size: 12px;
+            color: #be185d;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            line-height: 1.5;
+        }
+
+        /* 主選單按鈕 */
+        .menu-btn-list {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .btn-speed {
+            width: 100%;
+            background: linear-gradient(90deg, #f43f5e, #fb923c, #f59e0b);
+            color: white;
+            font-weight: 900;
+            padding: 14px 16px;
+            border-radius: 18px;
+            box-shadow: 0 6px 15px rgba(244, 63, 94, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 2px solid #fff;
+        }
+        .btn-primary {
+            width: 100%;
+            background: linear-gradient(90deg, #f472b6, #fb7185);
+            color: white;
+            font-weight: 800;
+            padding: 13px 16px;
+            border-radius: 18px;
+            box-shadow: 0 4px 12px rgba(244, 114, 182, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 15px;
+        }
+        .sub-btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            width: 100%;
+        }
+        .btn-amber {
+            background: linear-gradient(90deg, #fbbf24, #f59e0b);
+            color: white;
+            font-weight: 800;
+            padding: 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2);
+        }
+        .btn-purple {
+            background: linear-gradient(90deg, #a855f7, #6366f1);
+            color: white;
+            font-weight: 800;
+            padding: 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            box-shadow: 0 4px 10px rgba(168, 85, 247, 0.2);
+        }
+        .btn-gray {
+            width: 100%;
+            background: #e2e8f0;
+            color: #475569;
+            font-weight: 800;
+            padding: 11px;
+            border-radius: 14px;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        /* 年級切換網格 */
+        .grade-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            width: 100%;
+            background: #fdf2f8;
+            padding: 6px;
+            border-radius: 16px;
+            border: 1px solid #fbcfe8;
+            margin-bottom: 12px;
+        }
+        .grade-tab {
+            padding: 8px 4px;
+            font-size: 12px;
+            font-weight: 800;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            background: white;
+            color: #64748b;
+        }
+        .grade-tab.active {
+            background: linear-gradient(90deg, #ec4899, #f43f5e);
+            color: white;
+            box-shadow: 0 2px 6px rgba(236, 72, 153, 0.3);
+        }
+
+        /* 單元列表 */
+        .scroll-list {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 290px;
+            overflow-y: auto;
+            padding-right: 2px;
+        }
+        .unit-item-btn {
+            width: 100%;
+            background: #fdf2f8;
+            border: 2px solid #fbcfe8;
+            color: #be185d;
+            font-weight: 700;
+            padding: 10px 12px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        /* 題目區與輸入框 */
+        .progress-track {
+            width: 100%;
+            background: #fce7f3;
+            height: 10px;
+            border-radius: 999px;
+            margin-bottom: 12px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            background: linear-gradient(90deg, #f472b6, #fb7185, #fbbf24);
+            height: 100%;
+            width: 0%;
+            transition: width 0.25s ease;
+        }
+        .question-card {
+            width: 100%;
+            background: linear-gradient(180deg, #fdf2f8 0%, #ffffff 100%);
+            border: 2px solid #fbcfe8;
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .q-text {
+            font-size: 17px;
+            font-weight: 800;
+            color: #334155;
+            text-align: center;
+            margin: 12px 0 16px 0;
+            line-height: 1.5;
+            word-break: break-word;
+            width: 100%;
+        }
+        .ans-input {
+            width: 100%;
+            text-align: center;
+            font-size: 18px;
+            font-weight: 800;
+            padding: 10px 12px;
+            border: 2px solid #f9a8d4;
+            border-radius: 14px;
+            margin-bottom: 10px;
+            outline: none;
+            background: #fff;
+        }
+        .ans-input:focus {
+            border-color: #ec4899;
+            box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.15);
+        }
+
+        /* 速算模式 2x2 選擇題網格 */
+        .speed-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff1f2;
+            border: 2px solid #fecdd3;
+            border-radius: 18px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+        }
+        .timer-box {
+            background: white;
+            padding: 4px 14px;
+            border-radius: 12px;
+            border: 2px solid #fda4af;
+            text-align: center;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 100%;
+            margin-top: 6px;
+        }
+        .opt-btn {
+            color: white;
+            font-weight: 900;
+            font-size: 22px;
+            padding: 16px 8px;
+            border-radius: 18px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.7);
+        }
+        .opt-0 { background: linear-gradient(180deg, #f472b6, #e11d48); }
+        .opt-1 { background: linear-gradient(180deg, #fbbf24, #ea580c); }
+        .opt-2 { background: linear-gradient(180deg, #38bdf8, #2563eb); }
+        .opt-3 { background: linear-gradient(180deg, #a855f7, #4f46e5); }
+
+        .urgent-timer {
+            animation: pulseUrgent 0.45s infinite alternate;
+        }
+        @keyframes pulseUrgent {
+            from { transform: scale(1); color: #ef4444; }
+            to { transform: scale(1.12); color: #b91c1c; }
+        }
+
+        /* 彈出視窗 Modal */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            z-index: 100;
+        }
+        .modal-card {
+            background: white;
+            border-radius: 26px;
+            padding: 20px;
+            max-width: 320px;
+            width: 100%;
+            text-align: center;
+            border: 4px solid #f9a8d4;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 背景漂浮與慶祝粒子 */
+        .floating-bg-svg {
+            position: fixed;
+            user-select: none;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.35;
+            width: 44px;
+            height: 44px;
+            animation: floatUp linear infinite;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(105vh) rotate(-10deg); }
+            100% { transform: translateY(-15vh) rotate(10deg); }
+        }
+        .confetti-kawaii {
+            position: fixed;
+            pointer-events: none;
+            z-index: 120;
+            width: 36px;
+            height: 36px;
+            animation: fallConfetti 1.1s ease-out forwards;
+        }
+        @keyframes fallConfetti {
+            0% { transform: translate(0, 0) scale(0.4); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(1.1) rotate(var(--rot)); opacity: 0; }
+        }
+
+        /* 尺寸輔助 Class */
+        .icon-xs { width: 16px; height: 16px; display: inline-block; vertical-align: middle; }
+        .icon-sm { width: 24px; height: 24px; display: inline-block; vertical-align: middle; }
+        .icon-md { width: 34px; height: 34px; display: inline-block; flex-shrink: 0; }
+        .icon-lg { width: 48px; height: 48px; display: inline-block; flex-shrink: 0; }
+        .icon-xl { width: 78px; height: 78px; display: inline-block; flex-shrink: 0; }
+    </style>
+</head>
+<body>
+
+    <!-- 背景漂浮日式卡通動物容器 -->
+    <div id="bg-animals-container"></div>
+
+    <!-- 主容器 -->
+    <div id="app">
+        
+        <!-- 頂部列 -->
+        <div id="top-bar">
+            <button type="button" class="home-btn jelly-btn" onclick="goHome()">
+                <span id="top-home-icon" class="icon-xs"></span> 首頁
+            </button>
+            <div class="badge-group">
+                <span id="display-diff" class="status-pill pill-purple">Lv.1</span>
+                <span class="status-pill pill-amber">
+                    <span id="top-star-icon" class="icon-xs"></span> <span id="star-count">0</span>
+                </span>
+                <span class="status-pill pill-yellow">
+                    <span id="top-coin-icon" class="icon-xs"></span> <span id="coin-count">0</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- 畫面 1：首頁選單 -->
+        <div id="screen-home">
+            <div class="mascot-stage">
+                <div class="stage-animals">
+                    <div id="home-side-left" class="icon-lg kawaii-wiggle"></div>
+                    <div id="home-mascot-display" class="icon-xl bouncy"></div>
+                    <div id="home-side-right" class="icon-lg kawaii-wiggle"></div>
+                </div>
+                <h1 class="title-main">小學數學冒險王</h1>
+                <div class="subtitle-tag">教育出版社《小學數學新思維》P.1 - P.6</div>
+            </div>
+
+            <div class="dialog-box">
+                <div class="icon-lg kawaii-wiggle" id="dialog-pet-icon"></div>
+                <div>
+                    <strong id="dialog-pet-name">白兔麻糬：</strong>
+                    <span>一起練習《數學新思維》或挑戰「30秒百題速算」收集金幣解鎖日本萌寵夥伴吧！</span>
+                </div>
+            </div>
+
+            <div class="menu-btn-list">
+                <!-- 30秒100題極限速算挑戰 -->
+                <button type="button" class="btn-speed jelly-btn" onclick="startSpeedChallenge()">
+                    <span style="display:flex; align-items:center; gap:10px;">
+                        <span id="btn-speed-icon" class="icon-md kawaii-wiggle"></span>
+                        <span style="text-align:left;">
+                            <span style="display:block; font-size:16px;">⚡ 30秒百題速算挑戰</span>
+                            <span style="display:block; font-size:11px; font-weight:normal; opacity:0.95;">限時30秒・100題四選一極速連擊！</span>
+                        </span>
+                    </span>
+                    <span style="background:rgba(255,255,255,0.25); padding:4px 10px; border-radius:999px; font-size:12px;">GO!</span>
+                </button>
+
+                <!-- 新思維單元練習 -->
+                <button type="button" class="btn-primary jelly-btn" onclick="openGradeSelect()">
+                    <span style="display:flex; align-items:center; gap:10px;">
+                        <span id="btn-study-icon" class="icon-md"></span>
+                        <span>新思維單元練習 (小一至小六)</span>
+                    </span>
+                    <span style="background:rgba(255,255,255,0.25); padding:4px 10px; border-radius:999px; font-size:12px;">進入</span>
+                </button>
+
+                <div class="sub-btn-grid">
+                    <button type="button" class="btn-amber jelly-btn" onclick="openShop()">
+                        <span id="btn-shop-icon" class="icon-sm"></span>
+                        <span>日本萌寵屋</span>
+                    </button>
+                    <button type="button" class="btn-purple jelly-btn" onclick="openSettings()">
+                        <span id="btn-set-icon" class="icon-sm"></span>
+                        <span>難度與題數</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 畫面 2：年級與單元選擇 -->
+        <div id="screen-grade" class="hidden">
+            <h2 style="font-size:17px; font-weight:900; color:#ec4899; margin:0 0 10px 0; text-align:center; display:flex; align-items:center; justify-content:center; gap:6px;">
+                <span id="grade-title-icon" class="icon-sm"></span>
+                <span>選擇年級與新思維單元</span>
+            </h2>
+            
+            <div class="grade-grid" id="grade-tabs-container"></div>
+            <div id="unit-list" class="scroll-list"></div>
+
+            <button type="button" class="btn-gray jelly-btn" onclick="goHome()">返回主選單</button>
+        </div>
+
+        <!-- 畫面 3：設定選單 -->
+        <div id="screen-settings" class="hidden">
+            <h2 style="font-size:18px; font-weight:900; color:#7e22ce; text-align:center; margin:0 0 12px 0;">遊戲參數設定</h2>
+            
+            <div style="background:#faf5ff; border:2px solid #e9d5ff; border-radius:18px; padding:16px; margin-bottom:14px;">
+                <div style="margin-bottom:16px;">
+                    <div style="display:flex; justify-content:space-between; font-weight:800; color:#6b21a8; font-size:14px; margin-bottom:6px;">
+                        <span>常規練習每局題數：</span>
+                        <span id="lbl-qcount" style="background:#e9d5ff; padding:2px 10px; border-radius:999px; font-size:12px;">10 題</span>
+                    </div>
+                    <input type="range" id="input-qcount" min="5" max="50" step="5" value="10" oninput="updateSettingsPreview()" style="width:100%; accent-color:#9333ea;">
+                </div>
+
+                <div>
+                    <div style="display:flex; justify-content:space-between; font-weight:800; color:#6b21a8; font-size:14px; margin-bottom:6px;">
+                        <span>挑戰難度級別 (Lv.1~10)：</span>
+                        <span id="lbl-diff" style="background:#e9d5ff; padding:2px 10px; border-radius:999px; font-size:12px;">Lv. 1</span>
+                    </div>
+                    <input type="range" id="input-diff" min="1" max="10" step="1" value="1" oninput="updateSettingsPreview()" style="width:100%; accent-color:#9333ea;">
+                </div>
+            </div>
+
+            <button type="button" class="btn-purple jelly-btn" style="width:100%; padding:13px;" onclick="saveSettings()">儲存設定並返回</button>
+        </div>
+
+        <!-- 畫面 4：日本萌寵商店 -->
+        <div id="screen-shop" class="hidden">
+            <h2 style="font-size:18px; font-weight:900; color:#d97706; text-align:center; margin:0 0 8px 0;">日本風可愛動物夥伴屋</h2>
+            <div style="background:#fffbeb; border:2px solid #fde68a; border-radius:14px; padding:8px; text-align:center; font-size:12px; font-weight:800; color:#92400e; margin-bottom:10px;">
+                目前金幣：<span id="shop-coin">0</span> ｜ 累積星星：<span id="shop-star">0</span>
+            </div>
+
+            <div class="scroll-list" id="shop-items-container" style="margin-bottom:10px;"></div>
+
+            <button type="button" class="btn-gray jelly-btn" onclick="goHome()">返回主選單</button>
+        </div>
+
+        <!-- 畫面 5：常規單元答題進行中 -->
+        <div id="screen-game" class="hidden">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; gap:6px;">
+                <span id="q-progress" class="status-pill" style="background:#fce7f3; color:#db2777;">第 1 / 10 題</span>
+                <div style="display:flex; align-items:center; gap:4px; background:#fffbeb; padding:4px 10px; border-radius:999px; border:1px solid #fde68a; max-width:65%;">
+                    <span id="q-helper-icon" class="icon-xs"></span>
+                    <span id="q-helper-msg" style="font-size:11px; color:#b45309; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">加油！</span>
+                </div>
+            </div>
+
+            <div class="progress-track">
+                <div id="progress-bar" class="progress-fill"></div>
+            </div>
+
+            <div class="question-card">
+                <div style="display:flex; align-items:center; justify-content:center; gap:12px;">
+                    <div id="question-animal-left" class="icon-md kawaii-wiggle"></div>
+                    <span id="question-badge" style="font-size:11px; font-weight:800; background:#fce7f3; color:#db2777; padding:4px 12px; border-radius:999px;">新思維挑戰</span>
+                    <div id="question-animal-right" class="icon-md bouncy"></div>
+                </div>
+
+                <div id="question-text" class="q-text">載入題目中...</div>
+
+                <input type="number" step="any" id="user-input" class="ans-input" placeholder="請輸入答案數字" onkeydown="if(event.key==='Enter') submitAnswer()">
+                <button type="button" class="btn-primary jelly-btn" style="justify-content:center;" onclick="submitAnswer()">
+                    <span>確定送出答案</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 畫面 5B：30秒100題極限速算挑戰 (四選一選擇題) -->
+        <div id="screen-speed" class="hidden">
+            <div class="speed-header">
+                <div style="display:flex; align-items:center; gap:6px;">
+                    <div id="speed-pet-avatar" class="icon-md kawaii-wiggle"></div>
+                    <div>
+                        <div style="font-size:10px; color:#f43f5e; font-weight:700;">目前題號</div>
+                        <div id="speed-q-num" style="font-size:14px; font-weight:900; color:#e11d48;">1 / 100</div>
+                    </div>
+                </div>
+
+                <div class="timer-box">
+                    <div style="font-size:10px; font-weight:700; color:#94a3b8;">剩餘時間</div>
+                    <div id="speed-timer-text" style="font-size:20px; font-weight:900; color:#e11d48;">30.0s</div>
+                </div>
+
+                <div style="text-align:right;">
+                    <div style="font-size:10px; color:#d97706; font-weight:700;">答對 / 連擊</div>
+                    <div style="font-size:14px; font-weight:900; color:#b45309;">
+                        <span id="speed-score">0</span>題 <span id="speed-combo" style="font-size:11px; background:#fef3c7; padding:2px 6px; border-radius:999px;">0連擊</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="progress-track" style="background:#f1f5f9;">
+                <div id="speed-timer-bar" class="progress-fill" style="width:100%; transition:width 0.08s linear;"></div>
+            </div>
+
+            <div id="speed-card" class="question-card" style="background:linear-gradient(180deg, #fffbeb 0%, #fdf2f8 100%);">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <div id="speed-deco-left" class="icon-sm kawaii-wiggle"></div>
+                    <span style="font-size:11px; font-weight:800; color:#ec4899; background:#fff; padding:2px 10px; border-radius:999px; border:1px solid #fbcfe8;">點選正確答案！</span>
+                    <div id="speed-deco-right" class="icon-sm kawaii-wiggle"></div>
+                </div>
+
+                <div id="speed-question-text" style="font-size:28px; font-weight:900; color:#1e293b; margin:14px 0; text-align:center;">
+                    12 + 8 = ?
+                </div>
+
+                <div id="speed-options-grid" class="options-grid"></div>
+            </div>
+
+            <button type="button" class="btn-gray jelly-btn" onclick="stopSpeedChallengeEarly()">
+                提早結束挑戰並結算
+            </button>
+        </div>
+
+        <!-- 畫面 6：結算畫面 -->
+        <div id="screen-result" class="hidden" style="text-align:center;">
+            <div style="display:flex; align-items:center; justify-content:center; gap:12px; margin-bottom:8px;">
+                <div id="res-pet-left" class="icon-lg kawaii-wiggle"></div>
+                <div id="res-pet-main" class="icon-xl bouncy"></div>
+                <div id="res-pet-right" class="icon-lg kawaii-wiggle"></div>
+            </div>
+            <h2 id="res-title" style="font-size:20px; font-weight:900; color:#ec4899; margin:4px 0;">森林大冒險完成！</h2>
+            <p id="res-subtitle" style="font-size:12px; color:#64748b; margin:0 0 14px 0;">日本萌寵們都為你的努力拍手歡呼！</p>
+
+            <div style="background:#fdf2f8; border:2px solid #fbcfe8; border-radius:18px; padding:14px; margin-bottom:14px; display:flex; flex-direction:column; gap:8px; font-size:14px; font-weight:800;">
+                <div style="display:flex; justify-content:space-between;">
+                    <span>答對題數：</span>
+                    <span id="res-correct" style="color:#db2777;">8 / 10</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span>獲得星星：</span>
+                    <span id="res-star" style="color:#d97706;">+8</span>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span>獲得金幣：</span>
+                    <span id="res-coin" style="color:#ca8a04;">+40</span>
+                </div>
+            </div>
+
+            <div class="sub-btn-grid">
+                <button type="button" class="btn-primary jelly-btn" style="justify-content:center;" onclick="restartGame()">再玩一次</button>
+                <button type="button" class="btn-gray jelly-btn" style="margin-top:0;" onclick="goHome()">回主選單</button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 自訂提示 Modal -->
+    <div id="custom-modal" class="modal-overlay hidden">
+        <div class="modal-card bouncy">
+            <div id="modal-icon" class="icon-xl kawaii-wiggle" style="margin-bottom:8px;"></div>
+            <h3 id="modal-title" style="font-size:18px; font-weight:900; color:#ec4899; margin:0 0 6px 0;">答對了！</h3>
+            <p id="modal-desc" style="font-size:13px; color:#475569; margin:0 0 16px 0; line-height:1.5;">獲得 1 顆星星與 5 枚金幣！</p>
+            <button type="button" class="btn-primary jelly-btn" style="justify-content:center; padding:11px;" onclick="closeModal()">
+                繼續下一題
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // 安全儲存封裝 (Safe Storage)：防止無痕模式或 iOS 阻擋 localStorage 導致按鍵死機
+        // =========================================================================
+        function safeGetItem(key, fallback) {
+            try {
+                const val = window.localStorage.getItem(key);
+                return val !== null ? val : fallback;
+            } catch (e) {
+                return fallback;
+            }
+        }
+        function safeSetItem(key, val) {
+            try {
+                window.localStorage.setItem(key, val);
+            } catch (e) {}
+        }
+
+        // =========================================================================
+        // 日本風可愛卡通動物 SVG 圖庫
+        // =========================================================================
+        const KAWAII_SVGS = {
+            usagi: `<svg viewBox="0 0 100 100" width="100%" height="100%">
+                <ellipse cx="34" cy="24" rx="10" ry="22" fill="#fff" stroke="#f472b6" stroke-width="3.5" transform="rotate(-8 34 24)"/>
+                <ellipse cx="34" cy="24" rx="5" ry="14" fill="#fbcfe8" transform="rotate(-8 34 24)"/>
+                <ellipse cx="66" cy="24" rx="10" ry="22" fill="#fff" stroke="#f472b6" stroke-width="3.5" transform="rotate(8 66 24)"/>
+                <ellipse cx="66" cy="24" rx="5" ry="14" fill="#fbcfe8" transform="rotate(8 66 24)"/>
+                <ellipse cx="50" cy="62" rx="36" ry="30" fill="#ffffff" stroke="#f472b6" stroke-width="3.5"/>
+                <ellipse cx="28" cy="65" rx="7" ry="4.5" fill="#f9a8d4"/>
+                <ellipse cx="72" cy="65" rx="7" ry="4.5" fill="#f9a8d4"/>
+                <circle cx="36" cy="58" r="4" fill="#3f2e21"/><circle cx="34.5" cy="56.5" r="1.3" fill="#fff"/>
+                <circle cx="64" cy="58" r="4" fill="#3f2e21"/><circle cx="62.5" cy="56.5" r="1.3" fill="#fff"/>
+                <path d="M 45 64 Q 50 69 50 64 Q 50 69 55 64" fill="none" stroke="#f472b6" stroke-width="3" stroke-linecap="round"/>
+                <circle cx="72" cy="40" r="6" fill="#f43f5e"/><circle cx="66" cy="42" r="4" fill="#fb7185"/>
+            </svg>`,
+            shiba: `<svg viewBox="0 0 100 100" width="100%" height="100%">
+                <polygon points="20,45 16,16 42,32" fill="#f59e0b" stroke="#b45309" stroke-width="3.5" stroke-linejoin="round"/>
+                <polygon points="80,45 84,16 58,32" fill="#f59e0b" stroke="#b45309" stroke-width="3.5" stroke-linejoin="round"/>
+                <ellipse cx="50" cy="60" rx="37" ry="31" fill="#fbbf24" stroke="#b45309" stroke-width="3.5"/>
+                <path d="M 18 65 Q 35 48 50 62 Q 65 48 82 65 Q 75 90 50 90 Q 25 90 18 65 Z" fill="#fffbeb"/>
+                <ellipse cx="38" cy="46" rx="4.5" ry="2.8" fill="#ffffff"/><ellipse cx="62" cy="46" rx="4.5" ry="2.8" fill="#ffffff"/>
+                <ellipse cx="26" cy="66" rx="6.5" ry="4" fill="#fda4af"/><ellipse cx="74" cy="66" rx="6.5" ry="4" fill="#fda4af"/>
+                <circle cx="36" cy="56" r="4" fill="#292524"/><circle cx="64" cy="56" r="4" fill="#292524"/>
+                <ellipse cx="50" cy="62" rx="4" ry="3" fill="#292524"/>
+                <path d="M 43 67 Q 50 72 50 65 Q 50 72 57 67" fill="none" stroke="#292524" stroke-width="3" stroke-linecap="round"/>
+            </svg>`,
+            neko: `<svg viewBox="0 0 100 100" width="100%" height="100%">
+                <polygon points="20,46 18,18 44,32" fill="#fb923c" stroke="#9a3412" stroke-width="3.5" stroke-linejoin="round"/>
+                <polygon points="80,46 82,18 56,32" fill="#334155" stroke="#9a3412" stroke-width="3.5" stroke-linejoin="round"/>
+                <ellipse cx="50" cy="60" rx="36" ry="30" fill="#ffffff" stroke="#9a3412" stroke-width="3.5"/>
+                <path d="M 20 44 Q 38 55 36 31 Z" fill="#fb923c"/><path d="M 80 44 Q 62 55 64 31 Z" fill="#475569"/>
+                <ellipse cx="27" cy="65" rx="6.5" ry="4" fill="#f9a8d4"/><ellipse cx="73" cy="65" rx="6.5" ry="4" fill="#f9a8d4"/>
+                <circle cx="36" cy="57" r="4" fill="#1e293b"/><circle cx="64" cy="57" r="4" fill="#1e293b"/>
+                <polygon points="47,62 53,62 50,66" fill="#f472b6"/>
+                <path d="M 44 68 Q 50 72 50 66 Q 50 72 56 68" fill="none" stroke="#9a3412" stroke-width="2.8" stroke-linecap="round"/>
+            </svg>`,
+            panda: `<svg viewBox="0 0 100 100" width="100%" height="100%">
+                <circle cx="24" cy="30" r="12" fill="#334155"/><circle cx="76" cy="30" r="12" fill="#334155"/>
+                <ellipse cx="50" cy="60" rx="37" ry="31" fill="#ffffff" stroke="#334155" stroke-width="3.5"/>
+                <ellipse cx="35" cy="57" rx="9" ry="11" fill="#334155" transform="rotate(-12 35 57)"/>
+                <ellipse cx="65" cy="57" rx="9" ry="11" fill="#334155" transform="rotate(12 65 57)"/>
+                <circle cx="36" cy="55" r="3.2" fill="#ffffff"/><circle cx="64" cy="55" r="3.2" fill="#ffffff"/>
+                <ellipse cx="24" cy="67" rx="6.5" ry="4" fill="#f9a8d4"/><ellipse cx="76" cy="67" rx="6.5" ry="4" fill="#f9a8d4"/>
+                <ellipse cx="50" cy="64" rx="4.5" ry="3" fill="#1e293b"/>
+                <path d="M 50 28 Q 58 16 66 24 Q 58 32 50 28 Z" fill="#4ade80" stroke="#166534" stroke-width="2"/>
+            </svg>`,
+            kuma: `<svg viewBox="0 0 100 100" width="100%" height="100%">
+                <circle cx="24" cy="32" r="13" fill="#d97706" stroke="#78350f" stroke-width="3.5"/>
+                <circle cx="76" cy="32" r="13" fill="#d97706" stroke="#78350f" stroke-width="3.5"/>
+                <ellipse cx="50" cy="60" rx="36" ry="30" fill="#d97706" stroke="#78350f" stroke-width="3.5"/>
+                <ellipse cx="50" cy="66" rx="14" ry="11" fill="#fef3c7"/>
+                <ellipse cx="26" cy="64" rx="6.5" ry="4" fill="#fb7185"/><ellipse cx="74" cy="64" rx="6.5" ry="4" fill="#fb7185"/>
+                <circle cx="36" cy="54" r="4" fill="#451a03"/><circle cx="64" cy="54" r="4" fill="#451a03"/>
+                <ellipse cx="50" cy="62" rx="4.5" ry="3.2" fill="#451a03"/>
+            </svg>`,
+            penguin: `<svg viewBox="0 0 100 100" width="100%" height="100%">
+                <ellipse cx="50" cy="60" rx="35" ry="32" fill="#bae6fd" stroke="#0284c7" stroke-width="3.5"/>
+                <ellipse cx="50" cy="66" rx="25" ry="22" fill="#ffffff"/>
+                <ellipse cx="28" cy="60" rx="6" ry="3.8" fill="#f9a8d4"/><ellipse cx="72" cy="60" rx="6" ry="3.8" fill="#f9a8d4"/>
+                <circle cx="37" cy="52" r="3.8" fill="#0f172a"/><circle cx="63" cy="52" r="3.8" fill="#0f172a"/>
+                <ellipse cx="50" cy="57" rx="7" ry="4" fill="#facc15" stroke="#ca8a04" stroke-width="2"/>
+                <path d="M 36 28 L 43 20 L 50 26 L 57 20 L 64 28 Z" fill="#fde047" stroke="#ca8a04" stroke-width="2.5"/>
+            </svg>`,
+            kitsune: `<svg viewBox="0 0 100 100" width="100%" height="100%">
+                <polygon points="18,48 12,14 44,32" fill="#fb923c" stroke="#c2410c" stroke-width="3.5" stroke-linejoin="round"/>
+                <polygon points="82,48 88,14 56,32" fill="#fb923c" stroke="#c2410c" stroke-width="3.5" stroke-linejoin="round"/>
+                <ellipse cx="50" cy="61" rx="37" ry="29" fill="#fb923c" stroke="#c2410c" stroke-width="3.5"/>
+                <path d="M 16 64 Q 35 50 50 66 Q 65 50 84 64 Q 72 90 50 90 Q 28 90 16 64 Z" fill="#fffbeb"/>
+                <ellipse cx="27" cy="66" rx="6.5" ry="4" fill="#fb7185"/><ellipse cx="73" cy="66" rx="6.5" ry="4" fill="#fb7185"/>
+                <path d="M 31 55 Q 36 50 41 55" fill="none" stroke="#431407" stroke-width="3.5" stroke-linecap="round"/>
+                <path d="M 59 55 Q 64 50 69 55" fill="none" stroke="#431407" stroke-width="3.5" stroke-linecap="round"/>
+                <circle cx="50" cy="63" r="3.5" fill="#431407"/>
+            </svg>`,
+            hamster: `<svg viewBox="0 0 100 100" width="100%" height="100%">
+                <circle cx="24" cy="34" r="11" fill="#fdba74" stroke="#c2410c" stroke-width="3"/>
+                <circle cx="76" cy="34" r="11" fill="#fdba74" stroke="#c2410c" stroke-width="3"/>
+                <ellipse cx="50" cy="62" rx="38" ry="29" fill="#ffffff" stroke="#c2410c" stroke-width="3.5"/>
+                <path d="M 15 56 Q 50 20 85 56 Q 68 42 50 52 Q 32 42 15 56 Z" fill="#fdba74"/>
+                <circle cx="24" cy="66" r="8" fill="#fda4af"/><circle cx="76" cy="66" r="8" fill="#fda4af"/>
+                <circle cx="36" cy="56" r="4" fill="#292524"/><circle cx="64" cy="56" r="4" fill="#292524"/>
+                <path d="M 44 64 Q 50 68 56 64" fill="none" stroke="#c2410c" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>`,
+            star: `<svg viewBox="0 0 100 100" width="100%" height="100%">
+                <polygon points="50,8 63,34 92,38 71,58 76,87 50,73 24,87 29,58 8,38 37,34" fill="#fde047" stroke="#eab308" stroke-width="4" stroke-linejoin="round"/>
+                <circle cx="40" cy="48" r="3" fill="#422006"/><circle cx="60" cy="48" r="3" fill="#422006"/>
+                <ellipse cx="33" cy="53" rx="4" ry="2.5" fill="#f472b6"/><ellipse cx="67" cy="53" rx="4" ry="2.5" fill="#f472b6"/>
+            </svg>`,
+            coin: `<svg viewBox="0 0 100 100" width="100%" height="100%">
+                <ellipse cx="50" cy="50" rx="34" ry="42" fill="#facc15" stroke="#b45309" stroke-width="4"/>
+                <rect x="38" y="38" width="24" height="24" rx="4" fill="#eab308" stroke="#b45309" stroke-width="3"/>
+            </svg>`,
+            ichigo: `<svg viewBox="0 0 100 100" width="100%" height="100%">
+                <ellipse cx="50" cy="64" rx="34" ry="24" fill="#fce7f3" stroke="#f472b6" stroke-width="3.5"/>
+                <path d="M 35 45 Q 50 15 65 45 Q 50 55 35 45 Z" fill="#f43f5e" stroke="#be123c" stroke-width="3"/>
+                <circle cx="38" cy="65" r="3" fill="#831843"/><circle cx="62" cy="65" r="3" fill="#831843"/>
+            </svg>`
+        };
+
+        function getKawaiiSvg(key) {
+            return KAWAII_SVGS[key] || KAWAII_SVGS.usagi;
+        }
+
+        // 解析 JSON 的安全函數
+        function safeParsePets() {
+            try {
+                const raw = safeGetItem('math_kawaii_pets', null);
+                if (!raw) return ['usagi'];
+                const parsed = JSON.parse(raw);
+                return Array.isArray(parsed) ? parsed : ['usagi'];
+            } catch (e) {
+                return ['usagi'];
+            }
+        }
+
+        let gameState = {
+            stars: parseInt(safeGetItem('math_stars', '0')) || 0,
+            coins: parseInt(safeGetItem('math_coins', '0')) || 0,
+            qCount: parseInt(safeGetItem('math_qcount', '10')) || 10,
+            difficulty: parseInt(safeGetItem('math_diff', '1')) || 1,
+            unlockedPets: safeParsePets(),
+            equippedPet: safeGetItem('math_equipped_kawaii', 'usagi')
+        };
+
+        let currentGrade = 1;
+        let currentUnitId = '';
+        let currentUnitTitle = '';
+        let currentQuestions = [];
+        let currentIndex = 0;
+        let correctCount = 0;
+        let currentCorrectAnswer = null;
+        let lastGameMode = 'normal';
+
+        const petShopItems = [
+            { id: 'usagi', name: '白兔麻糬 (Usagi)', cost: 0, desc: '軟綿綿的櫻花草莓大福兔' },
+            { id: 'shiba', name: '豆柴丸子 (Shiba)', cost: 25, desc: '精神飽滿的日本赤柴犬' },
+            { id: 'neko', name: '三毛招財貓 (Mike)', cost: 40, desc: '帶來數學好運的日本三毛貓' },
+            { id: 'panda', name: '宇治抹茶熊貓', cost: 60, desc: '頭頂嫩綠茶葉的圓滾滾熊貓' },
+            { id: 'kuma', name: '焦糖布丁小熊', cost: 80, desc: '最愛吃甜品的暖心小熊' },
+            { id: 'penguin', name: '皇冠角落小企鵝', cost: 100, desc: '呆萌可愛的冰原小企鵝' },
+            { id: 'kitsune', name: '稻荷小狐狸', cost: 130, desc: '聰明伶俐的神社小狐狸' },
+            { id: 'hamster', name: '葵花籽小倉鼠', cost: 160, desc: '臉頰塞滿食物的速算高手' }
+        ];
+
+        const gradeMeta = {
+            1: { name: '一年級', svg: 'usagi' },
+            2: { name: '二年級', svg: 'shiba' },
+            3: { name: '三年級', svg: 'neko' },
+            4: { name: '四年級', svg: 'panda' },
+            5: { name: '五年級', svg: 'kuma' },
+            6: { name: '六年級', svg: 'kitsune' }
+        };
+
+        const curriculum = {
+            1: [
+                { id: 'g1_1', name: '1. 20以內的數與順數倒數', svg: 'usagi' },
+                { id: 'g1_2', name: '2. 18以內的加法與減法', svg: 'hamster' },
+                { id: 'g1_3', name: '3. 長度、距離與香港硬幣', svg: 'coin' },
+                { id: 'g1_4', name: '4. 兩位數認識與不進退位加減', svg: 'penguin' },
+                { id: 'g1_5', name: '5. 新思維生活文字題 (小一)', svg: 'neko' }
+            ],
+            2: [
+                { id: 'g2_1', name: '1. 三位數與100以內進退位加減', svg: 'panda' },
+                { id: 'g2_2', name: '2. 基本乘法 (0-10) 與九九乘法', svg: 'shiba' },
+                { id: 'g2_3', name: '3. 基本除法與分物概念', svg: 'kuma' },
+                { id: 'g2_4', name: '4. 香港紙幣與購物找贖計算', svg: 'coin' },
+                { id: 'g2_5', name: '5. 新思維生活文字題 (小二)', svg: 'kitsune' }
+            ],
+            3: [
+                { id: 'g3_1', name: '1. 四位數與多位數乘除法', svg: 'kuma' },
+                { id: 'g3_2', name: '2. 四則混合計算 (先乘除後加減)', svg: 'neko' },
+                { id: 'g3_3', name: '3. 分數認識與同分母分數加減', svg: 'ichigo' },
+                { id: 'g3_4', name: '4. 長方形與正方形周界計算', svg: 'shiba' },
+                { id: 'g3_5', name: '5. 新思維生活文字題 (小三)', svg: 'penguin' }
+            ],
+            4: [
+                { id: 'g4_1', name: '1. 倍數、因數、H.C.F. 與 L.C.M.', svg: 'panda' },
+                { id: 'g4_2', name: '2. 兩位數乘法與多位數除法', svg: 'hamster' },
+                { id: 'g4_3', name: '3. 分數種類(假分數/帶分數)與計算', svg: 'ichigo' },
+                { id: 'g4_4', name: '4. 小數的認識與加減法', svg: 'penguin' },
+                { id: 'g4_5', name: '5. 長方形與正方形面積及文字題', svg: 'kitsune' }
+            ],
+            5: [
+                { id: 'g5_1', name: '1. 多位數(大數)與異分母分數加減', svg: 'usagi' },
+                { id: 'g5_2', name: '2. 分數乘法與小數乘法', svg: 'kitsune' },
+                { id: 'g5_3', name: '3. 三角形、平行四邊形與梯形面積', svg: 'shiba' },
+                { id: 'g5_4', name: '4. 簡易代數符號與一步方程', svg: 'neko' },
+                { id: 'g5_5', name: '5. 正方體與長方體體積及文字題', svg: 'kuma' }
+            ],
+            6: [
+                { id: 'g6_1', name: '1. 小數除法與四則混合計算', svg: 'hamster' },
+                { id: 'g6_2', name: '2. 百分數認識與小數互化及折扣', svg: 'coin' },
+                { id: 'g6_3', name: '3. 圓周計算 (π=3.14) 與速率問題', svg: 'kitsune' },
+                { id: 'g6_4', name: '4. 平均數計算與兩步簡易方程', svg: 'panda' },
+                { id: 'g6_5', name: '5. 新思維綜合高階應用文字題', svg: 'star' }
+            ]
+        };
+
+        function initStaticIcons() {
+            document.getElementById('top-home-icon').innerHTML = getKawaiiSvg('usagi');
+            document.getElementById('top-star-icon').innerHTML = getKawaiiSvg('star');
+            document.getElementById('top-coin-icon').innerHTML = getKawaiiSvg('coin');
+            document.getElementById('home-side-left').innerHTML = getKawaiiSvg('shiba');
+            document.getElementById('home-side-right').innerHTML = getKawaiiSvg('panda');
+            document.getElementById('btn-speed-icon').innerHTML = getKawaiiSvg('hamster');
+            document.getElementById('btn-study-icon').innerHTML = getKawaiiSvg('neko');
+            document.getElementById('btn-shop-icon').innerHTML = getKawaiiSvg('kuma');
+            document.getElementById('btn-set-icon').innerHTML = getKawaiiSvg('penguin');
+            document.getElementById('grade-title-icon').innerHTML = getKawaiiSvg('usagi');
+        }
+
+        function initFloatingBgAnimals() {
+            const container = document.getElementById('bg-animals-container');
+            const keys = ['usagi', 'shiba', 'neko', 'panda', 'kuma', 'penguin', 'kitsune', 'hamster', 'star', 'ichigo'];
+            container.innerHTML = '';
+            for (let i = 0; i < 10; i++) {
+                const div = document.createElement('div');
+                div.className = 'floating-bg-svg';
+                div.innerHTML = getKawaiiSvg(keys[i % keys.length]);
+                div.style.left = `${Math.random() * 88}vw`;
+                div.style.animationDuration = `${14 + Math.random() * 12}s`;
+                div.style.animationDelay = `-${Math.random() * 14}s`;
+                container.appendChild(div);
+            }
+        }
+
+        function triggerAnimalCelebration() {
+            const keys = ['usagi', 'shiba', 'neko', 'panda', 'star', 'ichigo', 'coin', 'hamster'];
+            for (let i = 0; i < 12; i++) {
+                const el = document.createElement('div');
+                el.className = 'confetti-kawaii';
+                el.innerHTML = getKawaiiSvg(keys[Math.floor(Math.random() * keys.length)]);
+                el.style.left = '48vw';
+                el.style.top = '45vh';
+                const angle = Math.random() * Math.PI * 2;
+                const dist = 50 + Math.random() * 120;
+                el.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
+                el.style.setProperty('--ty', `${Math.sin(angle) * dist - 40}px`);
+                el.style.setProperty('--rot', `${(Math.random() - 0.5) * 360}deg`);
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 1100);
+            }
+        }
+
+        let audioCtx = null;
+        function playSound(type) {
+            try {
+                if (!audioCtx) {
+                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContextClass) audioCtx = new AudioContextClass();
+                }
+                if (!audioCtx) return;
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now);
+                    osc.frequency.setValueAtTime(659.25, now + 0.06);
+                    osc.frequency.setValueAtTime(783.99, now + 0.12);
+                    osc.frequency.setValueAtTime(1046.50, now + 0.18);
+                    gain.gain.setValueAtTime(0.15, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(240, now);
+                    osc.frequency.setValueAtTime(185, now + 0.12);
+                    gain.gain.setValueAtTime(0.11, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.26);
+                    osc.start(now);
+                    osc.stop(now + 0.26);
+                }
+            } catch (e) {}
+        }
+
+        function getEquippedPetObj() {
+            return petShopItems.find(p => p.id === gameState.equippedPet) || petShopItems[0];
+        }
+
+        function updateTopBar() {
+            document.getElementById('star-count').innerText = gameState.stars;
+            document.getElementById('coin-count').innerText = gameState.coins;
+            document.getElementById('display-diff').innerText = `Lv.${gameState.difficulty}`;
+            
+            const pet = getEquippedPetObj();
+            document.getElementById('home-mascot-display').innerHTML = getKawaiiSvg(pet.id);
+            document.getElementById('dialog-pet-icon').innerHTML = getKawaiiSvg(pet.id);
+            document.getElementById('dialog-pet-name').innerText = `${pet.name}：`;
+        }
+
+        function hideAllScreens() {
+            ['screen-home', 'screen-grade', 'screen-settings', 'screen-shop', 'screen-game', 'screen-speed', 'screen-result'].forEach(s => {
+                const el = document.getElementById(s);
+                if (el) el.classList.add('hidden');
+            });
+        }
+
+        function goHome() {
+            clearSpeedTimer();
+            hideAllScreens();
+            document.getElementById('screen-home').classList.remove('hidden');
+            updateTopBar();
+        }
+
+        // =========================================================================
+        // ⚡ 30秒 100題 極限速算挑戰 (四選一選擇題模式)
+        // =========================================================================
+        let speedQuestions = [];
+        let speedIndex = 0;
+        let speedCorrect = 0;
+        let speedCombo = 0;
+        let speedTimeLeft = 30.0;
+        let speedTimerInterval = null;
+
+        function clearSpeedTimer() {
+            if (speedTimerInterval) {
+                clearInterval(speedTimerInterval);
+                speedTimerInterval = null;
+            }
+        }
+
+        function randInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+        function gcd(a, b) {
+            return b === 0 ? a : gcd(b, a % b);
+        }
+
+        function generate100SpeedQuestions(diff) {
+            const list = [];
+            const svgKeys = ['usagi', 'shiba', 'neko', 'panda', 'kuma', 'penguin', 'kitsune', 'hamster', 'ichigo'];
+
+            for (let i = 0; i < 100; i++) {
+                let qText = '';
+                let ans = 0;
+                const opType = Math.random();
+
+                if (diff <= 3) {
+                    if (opType < 0.45) {
+                        let a = randInt(2, 12 + diff * 4);
+                        let b = randInt(2, 12 + diff * 3);
+                        qText = `${a} + ${b} = ?`;
+                        ans = a + b;
+                    } else if (opType < 0.8) {
+                        let b = randInt(2, 10 + diff * 2);
+                        let ansVal = randInt(2, 15 + diff * 2);
+                        let a = b + ansVal;
+                        qText = `${a} - ${b} = ?`;
+                        ans = ansVal;
+                    } else {
+                        let a = randInt(2, 6 + diff);
+                        let b = randInt(2, 9);
+                        qText = `${a} × ${b} = ?`;
+                        ans = a * b;
+                    }
+                } else if (diff <= 7) {
+                    if (opType < 0.3) {
+                        let a = randInt(12, 35 + diff * 4);
+                        let b = randInt(11, 28 + diff * 3);
+                        qText = `${a} + ${b} = ?`;
+                        ans = a + b;
+                    } else if (opType < 0.55) {
+                        let b = randInt(11, 30);
+                        let ansVal = randInt(12, 40);
+                        let a = b + ansVal;
+                        qText = `${a} - ${b} = ?`;
+                        ans = ansVal;
+                    } else if (opType < 0.8) {
+                        let a = randInt(3, 9);
+                        let b = randInt(4, 9);
+                        qText = `${a} × ${b} = ?`;
+                        ans = a * b;
+                    } else {
+                        let b = randInt(2, 9);
+                        let ansVal = randInt(3, 9);
+                        let a = b * ansVal;
+                        qText = `${a} ÷ ${b} = ?`;
+                        ans = ansVal;
+                    }
+                } else {
+                    if (opType < 0.35) {
+                        let a = randInt(6, 15);
+                        let b = randInt(4, 12);
+                        qText = `${a} × ${b} = ?`;
+                        ans = a * b;
+                    } else if (opType < 0.65) {
+                        let b = randInt(4, 12);
+                        let ansVal = randInt(4, 12);
+                        let a = b * ansVal;
+                        qText = `${a} ÷ ${b} = ?`;
+                        ans = ansVal;
+                    } else {
+                        let a = randInt(10, 30);
+                        let b = randInt(2, 7);
+                        let c = randInt(2, 6);
+                        qText = `${a} + ${b} × ${c} = ?`;
+                        ans = a + b * c;
+                    }
+                }
+
+                const optionsSet = new Set([ans]);
+                const offsets = [1, -1, 2, -2, 3, -3, 5, -5, 10, -10, 4, -4];
+                while (optionsSet.size < 4) {
+                    let delta = offsets[Math.floor(Math.random() * offsets.length)];
+                    let candidate = ans + delta;
+                    if (candidate >= 0 && candidate !== ans) {
+                        optionsSet.add(candidate);
+                    } else {
+                        optionsSet.add(ans + optionsSet.size + 1);
+                    }
+                }
+                const options = Array.from(optionsSet).sort(() => Math.random() - 0.5);
+
+                list.push({
+                    qText,
+                    ans,
+                    options,
+                    leftSvg: svgKeys[i % svgKeys.length],
+                    rightSvg: svgKeys[(i + 3) % svgKeys.length]
+                });
+            }
+            return list;
+        }
+
+        function startSpeedChallenge() {
+            lastGameMode = 'speed';
+            clearSpeedTimer();
+            speedQuestions = generate100SpeedQuestions(gameState.difficulty);
+            speedIndex = 0;
+            speedCorrect = 0;
+            speedCombo = 0;
+            speedTimeLeft = 30.0;
+
+            hideAllScreens();
+            document.getElementById('screen-speed').classList.remove('hidden');
+            
+            const pet = getEquippedPetObj();
+            document.getElementById('speed-pet-avatar').innerHTML = getKawaiiSvg(pet.id);
+            document.getElementById('speed-timer-text').classList.remove('urgent-timer');
+
+            renderSpeedQuestion();
+
+            const startTime = Date.now();
+            const totalDuration = 30000;
+
+            speedTimerInterval = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const remaining = Math.max(0, (totalDuration - elapsed) / 1000);
+                speedTimeLeft = remaining;
+
+                const timerTextEl = document.getElementById('speed-timer-text');
+                timerTextEl.innerText = `${remaining.toFixed(1)}s`;
+
+                const pct = (remaining / 30) * 100;
+                document.getElementById('speed-timer-bar').style.width = `${pct}%`;
+
+                if (remaining <= 8.0) {
+                    timerTextEl.classList.add('urgent-timer');
+                }
+                if (remaining <= 0) {
+                    finishSpeedChallenge();
+                }
+            }, 80);
+        }
+
+        function renderSpeedQuestion() {
+            if (speedIndex >= 100) {
+                finishSpeedChallenge();
+                return;
+            }
+
+            const q = speedQuestions[speedIndex];
+            document.getElementById('speed-q-num').innerText = `${speedIndex + 1} / 100`;
+            document.getElementById('speed-score').innerText = speedCorrect;
+            document.getElementById('speed-combo').innerText = `${speedCombo}連擊`;
+            document.getElementById('speed-question-text').innerText = q.qText;
+            document.getElementById('speed-deco-left').innerHTML = getKawaiiSvg(q.leftSvg);
+            document.getElementById('speed-deco-right').innerHTML = getKawaiiSvg(q.rightSvg);
+
+            const grid = document.getElementById('speed-options-grid');
+            grid.innerHTML = '';
+
+            q.options.forEach((optVal, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `opt-btn opt-${idx} jelly-btn`;
+                btn.innerText = optVal;
+                btn.onclick = function() { handleSpeedOptionClick(optVal); };
+                grid.appendChild(btn);
+            });
+        }
+
+        function handleSpeedOptionClick(selectedVal) {
+            if (speedTimeLeft <= 0 || speedIndex >= 100) return;
+
+            const currentQ = speedQuestions[speedIndex];
+            const card = document.getElementById('speed-card');
+
+            if (selectedVal === currentQ.ans) {
+                speedCorrect++;
+                speedCombo++;
+                playSound('correct');
+                card.style.borderColor = '#34d399';
+                setTimeout(() => { card.style.borderColor = '#fbcfe8'; }, 120);
+            } else {
+                speedCombo = 0;
+                playSound('wrong');
+                card.style.borderColor = '#f43f5e';
+                setTimeout(() => { card.style.borderColor = '#fbcfe8'; }, 120);
+            }
+
+            speedIndex++;
+            renderSpeedQuestion();
+        }
+
+        function stopSpeedChallengeEarly() {
+            finishSpeedChallenge();
+        }
+
+        function finishSpeedChallenge() {
+            clearSpeedTimer();
+            hideAllScreens();
+            document.getElementById('screen-result').classList.remove('hidden');
+
+            const earnedStars = speedCorrect;
+            const earnedCoins = speedCorrect * 3;
+            gameState.stars += earnedStars;
+            gameState.coins += earnedCoins;
+            safeSetItem('math_stars', gameState.stars);
+            safeSetItem('math_coins', gameState.coins);
+            updateTopBar();
+
+            triggerAnimalCelebration();
+
+            const pet = getEquippedPetObj();
+            document.getElementById('res-pet-left').innerHTML = getKawaiiSvg('shiba');
+            document.getElementById('res-pet-main').innerHTML = getKawaiiSvg(pet.id);
+            document.getElementById('res-pet-right').innerHTML = getKawaiiSvg('neko');
+
+            document.getElementById('res-title').innerText = '⚡ 30秒極限速算完成！';
+            document.getElementById('res-subtitle').innerText = `你在 30 秒內共挑戰了 ${speedIndex} 題，答對 ${speedCorrect} 題！`;
+            document.getElementById('res-correct').innerText = `${speedCorrect} 題 (作答 ${speedIndex} 題)`;
+            document.getElementById('res-star').innerText = `+${earnedStars}`;
+            document.getElementById('res-coin').innerText = `+${earnedCoins}`;
+        }
+
+        // =========================================================================
+        // 常規年級與新思維單元選擇 (P.1 ~ P.6)
+        // =========================================================================
+        function openGradeSelect() {
+            hideAllScreens();
+            document.getElementById('screen-grade').classList.remove('hidden');
+            switchGradeTab(currentGrade || 1);
+        }
+
+        function switchGradeTab(grade) {
+            currentGrade = grade;
+            const tabsContainer = document.getElementById('grade-tabs-container');
+            tabsContainer.innerHTML = '';
+
+            for (let i = 1; i <= 6; i++) {
+                const meta = gradeMeta[i];
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = (i === grade) ? 'grade-tab active jelly-btn' : 'grade-tab jelly-btn';
+                btn.innerHTML = `<span class="icon-xs">${getKawaiiSvg(meta.svg)}</span><span>${meta.name}</span>`;
+                btn.onclick = function() { switchGradeTab(i); };
+                tabsContainer.appendChild(btn);
+            }
+
+            const listEl = document.getElementById('unit-list');
+            listEl.innerHTML = '';
+            curriculum[grade].forEach(unit => {
+                const uBtn = document.createElement('button');
+                uBtn.type = 'button';
+                uBtn.className = 'unit-item-btn jelly-btn';
+                uBtn.innerHTML = `
+                    <span style="display:flex; align-items:center; gap:10px; padding-right:8px;">
+                        <span class="icon-md kawaii-wiggle">${getKawaiiSvg(unit.svg)}</span>
+                        <span>${unit.name}</span>
+                    </span>
+                    <span style="background:#ec4899; color:#fff; font-size:11px; padding:4px 10px; border-radius:999px; white-space:nowrap;">開始</span>
+                `;
+                uBtn.onclick = function() { startUnitGame(unit.id, unit.name); };
+                listEl.appendChild(uBtn);
+            });
+        }
+
+        function openSettings() {
+            hideAllScreens();
+            document.getElementById('screen-settings').classList.remove('hidden');
+            document.getElementById('input-qcount').value = gameState.qCount;
+            document.getElementById('input-diff').value = gameState.difficulty;
+            updateSettingsPreview();
+        }
+
+        function updateSettingsPreview() {
+            const q = document.getElementById('input-qcount').value;
+            const d = document.getElementById('input-diff').value;
+            document.getElementById('lbl-qcount').innerText = `${q} 題`;
+            document.getElementById('lbl-diff').innerText = `Lv. ${d}`;
+        }
+
+        function saveSettings() {
+            gameState.qCount = parseInt(document.getElementById('input-qcount').value) || 10;
+            gameState.difficulty = parseInt(document.getElementById('input-diff').value) || 1;
+            safeSetItem('math_qcount', gameState.qCount);
+            safeSetItem('math_diff', gameState.difficulty);
+            updateTopBar();
+            goHome();
+        }
+
+        function openShop() {
+            hideAllScreens();
+            document.getElementById('screen-shop').classList.remove('hidden');
+            document.getElementById('shop-coin').innerText = gameState.coins;
+            document.getElementById('shop-star').innerText = gameState.stars;
+            
+            const container = document.getElementById('shop-items-container');
+            container.innerHTML = '';
+            petShopItems.forEach(item => {
+                const isUnlocked = gameState.unlockedPets.includes(item.id);
+                const isEquipped = gameState.equippedPet === item.id;
+                
+                const div = document.createElement('div');
+                div.style.cssText = "background:#fffbeb; border:2px solid #fde68a; border-radius:16px; padding:10px; display:flex; justify-content:space-between; align-items:center; font-size:12px;";
+                
+                let actionHtml = '';
+                if (isEquipped) {
+                    actionHtml = `<span style="background:#d1fae5; color:#047857; font-weight:800; padding:6px 12px; border-radius:12px;">陪伴中</span>`;
+                } else if (isUnlocked) {
+                    actionHtml = `<button type="button" onclick="equipPet('${item.id}')" style="background:#f59e0b; color:#fff; font-weight:800; padding:6px 12px; border-radius:12px;">選擇</button>`;
+                } else {
+                    actionHtml = `<button type="button" onclick="buyPet('${item.id}', ${item.cost})" style="background:#f43f5e; color:#fff; font-weight:800; padding:6px 12px; border-radius:12px;">解鎖</button>`;
+                }
+
+                div.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div class="icon-lg kawaii-wiggle">${getKawaiiSvg(item.id)}</div>
+                        <div>
+                            <div style="font-weight:800; color:#78350f; font-size:14px;">${item.name}</div>
+                            <div style="font-size:11px; color:#64748b;">${item.desc}</div>
+                            <div style="font-size:11px; color:#d97706; font-weight:800; margin-top:2px;">${item.cost === 0 ? '免費初始夥伴' : '需要金幣：' + item.cost}</div>
+                        </div>
+                    </div>
+                    <div style="flex-shrink:0; margin-left:8px;">${actionHtml}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function buyPet(id, cost) {
+            if (gameState.coins >= cost) {
+                gameState.coins -= cost;
+                if (!gameState.unlockedPets.includes(id)) gameState.unlockedPets.push(id);
+                gameState.equippedPet = id;
+                safeSetItem('math_coins', gameState.coins);
+                safeSetItem('math_kawaii_pets', JSON.stringify(gameState.unlockedPets));
+                safeSetItem('math_equipped_kawaii', gameState.equippedPet);
+                playSound('correct');
+                triggerAnimalCelebration();
+                openShop();
+                updateTopBar();
+            } else {
+                playSound('wrong');
+                showModal('coin', '金幣還不夠喔！', '快去挑戰「30秒速算」或「新思維單元」賺取更多金幣吧！', false);
+            }
+        }
+
+        function equipPet(id) {
+            gameState.equippedPet = id;
+            safeSetItem('math_equipped_kawaii', id);
+            openShop();
+            updateTopBar();
+        }
+
+        function startUnitGame(unitId, unitName) {
+            lastGameMode = 'normal';
+            currentUnitId = unitId;
+            currentUnitTitle = unitName || '新思維挑戰';
+            currentQuestions = generateQuestions(unitId, gameState.qCount, gameState.difficulty);
+            currentIndex = 0;
+            correctCount = 0;
+
+            hideAllScreens();
+            document.getElementById('screen-game').classList.remove('hidden');
+            document.getElementById('question-badge').innerText = currentUnitTitle;
+            loadQuestion();
+        }
+
+        function generateQuestions(unitId, count, diff) {
+            let questions = [];
+            const svgPairs = [
+                ['usagi', 'ichigo'], ['shiba', 'star'], ['neko', 'coin'], ['panda', 'ichigo'],
+                ['kuma', 'star'], ['penguin', 'ichigo'], ['kitsune', 'coin'], ['hamster', 'star']
+            ];
+
+            for (let i = 0; i < count; i++) {
+                let qText = "";
+                let ans = 0;
+                const pair = svgPairs[i % svgPairs.length];
+
+                switch (unitId) {
+                    case 'g1_1': {
+                        let start = randInt(1, 10 + diff);
+                        let step = randInt(1, 3);
+                        qText = `小雞排隊報數：${start}，${start + step}，${start + step * 2}，下一個數是多少？`;
+                        ans = start + step * 3;
+                        break;
+                    }
+                    case 'g1_2': {
+                        let a = randInt(3, 8 + diff);
+                        let b = randInt(2, 7 + Math.floor(diff / 2));
+                        if (Math.random() > 0.4) {
+                            qText = `白兔麻糬早上做了 ${a} 個草莓大福，下午又做了 ${b} 個，今天一共做了幾個？`;
+                            ans = a + b;
+                        } else {
+                            let total = a + b;
+                            qText = `小倉鼠有 ${total} 顆葵花籽，吃掉了 ${a} 顆後，還剩下幾顆？`;
+                            ans = b;
+                        }
+                        break;
+                    }
+                    case 'g1_3': {
+                        let c5 = randInt(1, 2);
+                        let c2 = randInt(1, 3 + Math.floor(diff / 3));
+                        let c1 = randInt(1, 4);
+                        qText = `招財貓錢包裡有 ${c5} 個 5元硬幣、${c2} 個 2元硬幣和 ${c1} 個 1元硬幣，合共有多少元？`;
+                        ans = c5 * 5 + c2 * 2 + c1;
+                        break;
+                    }
+                    case 'g1_4': {
+                        let numA = randInt(1, 4 + Math.floor(diff / 2)) * 10 + randInt(1, 4);
+                        let numB = randInt(1, 3) * 10 + randInt(1, 5);
+                        qText = `小企鵝走了 ${numA} 步，白兔麻糬走了 ${numB} 步，牠們一共走了多少步？`;
+                        ans = numA + numB;
+                        break;
+                    }
+                    case 'g1_5': {
+                        let a = randInt(5, 10 + diff);
+                        let b = randInt(2, 6);
+                        let c = randInt(1, 4);
+                        qText = `森林電車上原有 ${a} 隻日本萌寵，到站後上車 ${b} 隻，下車 ${c} 隻，現在車上有幾隻？`;
+                        ans = a + b - c;
+                        break;
+                    }
+                    case 'g2_1': {
+                        let a = randInt(25, 45 + diff * 4);
+                        let b = randInt(18, 35 + diff * 3);
+                        let c = randInt(12, 25);
+                        qText = `抹茶熊貓茶屋準備了 ${a} 串團子，又做好了 ${b} 串，賣出 ${c} 串後，還剩多少串？`;
+                        ans = a + b - c;
+                        break;
+                    }
+                    case 'g2_2': {
+                        let a = randInt(2, 9);
+                        let b = randInt(2, 9);
+                        qText = `每張碟子上有 ${a} 個銅鑼燒，${b} 張碟子上一共有多少個銅鑼燒？`;
+                        ans = a * b;
+                        break;
+                    }
+                    case 'g2_3': {
+                        let divisor = randInt(2, 9);
+                        let quotient = randInt(2, 8 + Math.floor(diff / 2));
+                        let total = divisor * quotient;
+                        qText = `把 ${total} 顆金平糖平均分給 ${divisor} 隻豆柴，每隻豆柴可分得幾顆？`;
+                        ans = quotient;
+                        break;
+                    }
+                    case 'g2_4': {
+                        let price = randInt(15, 38 + diff * 3);
+                        let pay = price < 50 ? 50 : 100;
+                        qText = `布丁小熊買了一個售 ${price} 元的焦糖布丁，付了一張 ${pay} 元紙幣，應找回多少元？`;
+                        ans = pay - price;
+                        break;
+                    }
+                    case 'g2_5': {
+                        let boxes = randInt(3, 6 + Math.floor(diff / 2));
+                        let perBox = randInt(4, 8);
+                        let extra = randInt(2, 9);
+                        qText = `稻荷小狐狸買了 ${boxes} 盒壽司，每盒有 ${perBox} 件，另外再買了 ${extra} 件，合共有多少件？`;
+                        ans = boxes * perBox + extra;
+                        break;
+                    }
+                    case 'g3_1': {
+                        let a = randInt(12, 25 + diff * 3);
+                        let b = randInt(3, 8);
+                        qText = `小倉鼠每天收集 ${a} 顆果實，連續 ${b} 天共可收集多少顆果實？`;
+                        ans = a * b;
+                        break;
+                    }
+                    case 'g3_2': {
+                        let a = randInt(15, 30 + diff * 2);
+                        let b = randInt(3, 8);
+                        let c = randInt(4, 9);
+                        qText = `計算：${a} + ${b} × ${c} = ? (先乘除後加減)`;
+                        ans = a + (b * c);
+                        break;
+                    }
+                    case 'g3_3': {
+                        let denom = randInt(5, 9 + Math.floor(diff / 2));
+                        let n1 = randInt(1, Math.floor(denom / 2));
+                        let n2 = randInt(1, denom - n1 - 1);
+                        qText = `一個抹茶蛋糕平分成 ${denom} 份，豆柴吃了 ${n1}/${denom} 個，三毛貓吃了 ${n2}/${denom} 個，共吃了幾分之幾？(請輸入分子數字)`;
+                        ans = n1 + n2;
+                        break;
+                    }
+                    case 'g3_4': {
+                        let len = randInt(8, 15 + diff * 2);
+                        let wid = randInt(4, len - 2);
+                        qText = `長方形和室長是 ${len} 米，闊是 ${wid} 米，它的周界是多少米？`;
+                        ans = (len + wid) * 2;
+                        break;
+                    }
+                    case 'g3_5': {
+                        let packPrice = randInt(12, 20 + diff);
+                        let countBuy = randInt(3, 5);
+                        qText = `小企鵝買了 ${countBuy} 包日式仙貝，每包售 ${packPrice} 元，付了 100 元，應找回多少元？`;
+                        ans = 100 - (packPrice * countBuy);
+                        break;
+                    }
+                    case 'g4_1': {
+                        let base = randInt(2, 5);
+                        let m1 = base * randInt(2, 4);
+                        let m2 = base * randInt(3, 5);
+                        if (m1 === m2) m2 += base;
+                        if (Math.random() > 0.5) {
+                            qText = `找出 ${m1} 和 ${m2} 的最大公因數 (H.C.F.) 是多少？`;
+                            ans = gcd(m1, m2);
+                        } else {
+                            qText = `找出 ${m1} 和 ${m2} 的最小公倍數 (L.C.M.) 是多少？`;
+                            ans = (m1 * m2) / gcd(m1, m2);
+                        }
+                        break;
+                    }
+                    case 'g4_2': {
+                        let a = randInt(11, 18 + diff);
+                        let b = randInt(11, 15);
+                        qText = `萌寵運動會有 ${a} 支隊伍，每隊有 ${b} 隻小動物，共有多少隻小動物參賽？`;
+                        ans = a * b;
+                        break;
+                    }
+                    case 'g4_3': {
+                        let whole = randInt(2, 5 + Math.floor(diff / 2));
+                        let denom = randInt(3, 7);
+                        let num = randInt(1, denom - 1);
+                        qText = `把帶分數 ${whole} 又 ${num}/${denom} 化為假分數，它的「分子」是多少？`;
+                        ans = whole * denom + num;
+                        break;
+                    }
+                    case 'g4_4': {
+                        let a = (randInt(12, 50 + diff * 3) / 10);
+                        let b = (randInt(11, 35) / 10);
+                        qText = `甲袋米重 ${a.toFixed(1)} 公斤，乙袋米重 ${b.toFixed(1)} 公斤，兩袋共重多少公斤？`;
+                        ans = parseFloat((a + b).toFixed(1));
+                        break;
+                    }
+                    case 'g4_5': {
+                        let side = randInt(6, 12 + diff);
+                        let wid = randInt(4, 10);
+                        qText = `長方形草莓園長 ${side} 米、闊 ${wid} 米，這塊草莓園的「面積」是多少平方米？`;
+                        ans = side * wid;
+                        break;
+                    }
+                    case 'g5_1': {
+                        let d2 = randInt(2, 4) * 2;
+                        let n2 = 1;
+                        qText = `白兔喝果汁：早上喝了 1/2 瓶，下午喝了 ${n2}/${d2} 瓶，合共喝了幾分之幾瓶？(化為分母 ${d2} 後，輸入分子數字)`;
+                        ans = (d2 / 2) + n2;
+                        break;
+                    }
+                    case 'g5_2': {
+                        let a = (randInt(15, 45) / 10);
+                        let b = randInt(2, 6 + Math.floor(diff / 2));
+                        qText = `每條日式頭巾用布 ${a.toFixed(1)} 米，製作 ${b} 條共用布多少米？`;
+                        ans = parseFloat((a * b).toFixed(1));
+                        break;
+                    }
+                    case 'g5_3': {
+                        let base = randInt(6, 14 + diff) * 2;
+                        let height = randInt(4, 12);
+                        qText = `三角形御飯糰花壇，底長 ${base} 米，高是 ${height} 米，面積是多少平方米？`;
+                        ans = (base * height) / 2;
+                        break;
+                    }
+                    case 'g5_4': {
+                        let x = randInt(4, 15 + diff * 2);
+                        let mult = randInt(2, 5);
+                        let total = x * mult;
+                        qText = `代數挑戰：如果 ${mult}y = ${total}，那麼未知數 y 的值是多少？`;
+                        ans = x;
+                        break;
+                    }
+                    case 'g5_5': {
+                        let l = randInt(4, 8 + Math.floor(diff / 2));
+                        let w = randInt(3, 6);
+                        let h = randInt(2, 5);
+                        qText = `長方體木製便當盒長 ${l} cm、闊 ${w} cm、高 ${h} cm，體積是多少 cm³？`;
+                        ans = l * w * h;
+                        break;
+                    }
+                    case 'g6_1': {
+                        let ansVal = randInt(3, 12 + diff);
+                        let div = randInt(2, 5) / 10;
+                        let total = parseFloat((ansVal * div).toFixed(1));
+                        qText = `把 ${total} 升綠茶，每 ${div} 升裝成一瓶，共可裝滿多少瓶？`;
+                        ans = ansVal;
+                        break;
+                    }
+                    case 'g6_2': {
+                        let origPrice = randInt(2, 10 + diff) * 20;
+                        let discount = [80, 75, 50, 90][randInt(0, 3)];
+                        let label = discount === 80 ? '八折 (80%)' : discount === 75 ? '七五折 (75%)' : discount === 50 ? '半價 (50%)' : '九折 (90%)';
+                        qText = `日本萌寵屋大減價！原價 ${origPrice} 元的公仔現售${label}，折實售價是多少元？`;
+                        ans = (origPrice * discount) / 100;
+                        break;
+                    }
+                    case 'g6_3': {
+                        if (Math.random() > 0.5) {
+                            let d = randInt(1, 5) * 10;
+                            qText = `繞著直徑 ${d} 米的圓形水池走一圈，圓周是多少米？(取 π = 3.14)`;
+                            ans = parseFloat((d * 3.14).toFixed(2));
+                        } else {
+                            let speed = randInt(40, 75 + diff * 2);
+                            let time = randInt(2, 5);
+                            qText = `新幹線列車平均速率是每小時 ${speed} 公里，行駛 ${time} 小時共走了多少公里？`;
+                            ans = speed * time;
+                        }
+                        break;
+                    }
+                    case 'g6_4': {
+                        if (Math.random() > 0.5) {
+                            let avg = randInt(12, 25 + diff);
+                            let n1 = avg - randInt(2, 5);
+                            let n3 = avg + (avg - n1);
+                            qText = `三隻小動物收集貼紙，分別有 ${n1} 張、${avg} 張和 ${n3} 張，平均每隻有多少張？`;
+                            ans = avg;
+                        } else {
+                            let x = randInt(3, 12 + diff);
+                            let a = randInt(2, 5);
+                            let b = randInt(4, 15);
+                            let res = a * x + b;
+                            qText = `解兩步方程：${a}x + ${b} = ${res}，請問 x = ?`;
+                            ans = x;
+                        }
+                        break;
+                    }
+                    default: {
+                        let totalStudents = randInt(2, 5) * 20;
+                        let pct = [25, 40, 60, 75][randInt(0, 3)];
+                        qText = `森林學院有 ${totalStudents} 隻小動物，其中 ${pct}% 喜歡算術，喜歡算術的有多少隻？`;
+                        ans = (totalStudents * pct) / 100;
+                        break;
+                    }
+                }
+
+                questions.push({ qText, ans, leftSvg: pair[0], rightSvg: pair[1] });
+            }
+            return questions;
+        }
+
+        function loadQuestion() {
+            if (currentIndex >= currentQuestions.length) {
+                showResult();
+                return;
+            }
+
+            const q = currentQuestions[currentIndex];
+            currentCorrectAnswer = q.ans;
+
+            document.getElementById('q-progress').innerText = `第 ${currentIndex + 1} / ${currentQuestions.length} 題`;
+            document.getElementById('question-text').innerText = q.qText;
+            document.getElementById('question-animal-left').innerHTML = getKawaiiSvg(q.leftSvg);
+            document.getElementById('question-animal-right').innerHTML = getKawaiiSvg(q.rightSvg);
+            document.getElementById('user-input').value = '';
+            
+            const percent = (currentIndex / currentQuestions.length) * 100;
+            document.getElementById('progress-bar').style.width = `${percent}%`;
+
+            const pet = getEquippedPetObj();
+            document.getElementById('q-helper-icon').innerHTML = getKawaiiSvg(pet.id);
+            const cheers = [
+                `${pet.name}：仔細看題目喔！`,
+                `${pet.name}：動動腦筋，你一定行！`,
+                `${pet.name}：答對就有星星和金幣唷！`
+            ];
+            document.getElementById('q-helper-msg').innerText = cheers[Math.floor(Math.random() * cheers.length)];
+        }
+
+        function submitAnswer() {
+            const val = document.getElementById('user-input').value.trim();
+            if (val === '') return;
+
+            const userAns = parseFloat(val);
+            const pet = getEquippedPetObj();
+            if (Math.abs(userAns - currentCorrectAnswer) < 0.001) {
+                correctCount++;
+                playSound('correct');
+                triggerAnimalCelebration();
+                showModal(pet.id, '答對了！太棒了！', '日本萌寵為你歡呼！獲得 +1 顆星星與 +5 枚金幣！', true);
+                gameState.stars += 1;
+                gameState.coins += 5;
+            } else {
+                playSound('wrong');
+                showModal('kitsune', '差一點點！別氣餒！', `正確答案是：${currentCorrectAnswer}，下一題繼續加油！`, true);
+            }
+
+            safeSetItem('math_stars', gameState.stars);
+            safeSetItem('math_coins', gameState.coins);
+            updateTopBar();
+        }
+
+        let shouldAdvanceQuestion = false;
+        function showModal(svgKey, title, desc, advance) {
+            shouldAdvanceQuestion = advance;
+            document.getElementById('modal-icon').innerHTML = getKawaiiSvg(svgKey);
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-desc').innerText = desc;
+            document.getElementById('custom-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').classList.add('hidden');
+            if (shouldAdvanceQuestion) {
+                currentIndex++;
+                if (currentIndex < currentQuestions.length) {
+                    loadQuestion();
+                } else {
+                    showResult();
+                }
+            }
+        }
+
+        function showResult() {
+            hideAllScreens();
+            document.getElementById('screen-result').classList.remove('hidden');
+            triggerAnimalCelebration();
+
+            const pet = getEquippedPetObj();
+            document.getElementById('res-pet-left').innerHTML = getKawaiiSvg('usagi');
+            document.getElementById('res-pet-main').innerHTML = getKawaiiSvg(pet.id);
+            document.getElementById('res-pet-right').innerHTML = getKawaiiSvg('panda');
+
+            document.getElementById('res-title').innerText = '新思維單元挑戰完成！';
+            document.getElementById('res-subtitle').innerText = '日本萌寵們都為你的努力拍手歡呼！';
+            document.getElementById('res-correct').innerText = `${correctCount} / ${currentQuestions.length}`;
+            document.getElementById('res-star').innerText = `+${correctCount}`;
+            document.getElementById('res-coin').innerText = `+${correctCount * 5}`;
+        }
+
+        function restartGame() {
+            if (lastGameMode === 'speed') {
+                startSpeedChallenge();
+            } else {
+                startUnitGame(currentUnitId, currentUnitTitle);
+            }
+        }
+
+        // 當網頁 DOM 完全載入後立即啟動
+        window.addEventListener('DOMContentLoaded', function() {
+            initStaticIcons();
+            initFloatingBgAnimals();
+            goHome();
+        });
+    </script>
+</body>
+</html>
